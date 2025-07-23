@@ -1,10 +1,10 @@
 {
-  "name": "vite-trello-web-base-project",
+  "name": "trello-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "author": "TrungQuanDev - Một Lập Trình Viên",
-  "description": "https://youtube.com/@trungquandev",
+  "author": "QuangTuDev",
+  "description": "Chu Quang Tú",
   "engines": {
     "node": ">=18.x"
   },
@@ -15,6 +15,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
