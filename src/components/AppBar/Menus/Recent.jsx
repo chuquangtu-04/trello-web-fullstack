@@ -39,7 +39,7 @@ function Recent() {
           'aria-labelledby': 'basic-button-recent'
         }}
       >
-<MenuItem>
+        <MenuItem>
           <ListItemText inset>Single</ListItemText>
         </MenuItem>
         <MenuItem>

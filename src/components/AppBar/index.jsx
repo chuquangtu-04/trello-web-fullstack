@@ -15,9 +15,11 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menus/Profiles'
+import theme from '~/theme'
 
 
 function AppBar() {
+  console.log(theme)
   return (
     <Box px={2} sx={{
       width: '100%',
@@ -29,7 +31,7 @@ function AppBar() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <AppsIcon sx={{ color: 'primary.main' }}/>
         <Box sx={{ display:'flex', gap: 0.5, alignItems: 'center' }}>
-          <SvgIcon component={StarIcon} inheritViewBox sx={{ color: 'primary.main' }}/>
+          <SvgIcon component={StarIcon} fontSize='small' inheritViewBox sx={{ color: 'primary.main' }}/>
           <Typography variant='span' sx={{ color: 'primary.main', fontSize: '1.2rem', fontWeight: 'bold' }}>Trello</Typography>
         </Box>
         <WorkSpaces />
@@ -43,13 +45,13 @@ function AppBar() {
         <TextField id="outlined-search" label="Search..." type="search" size='small' />
         <ModeSelect/>
         <Tooltip title="Notification">
-          <Badge color="secondary" variant="dot" sx={{cursor: 'pointer'}}>
-            <NotificationsNoneIcon />
+          <Badge color="secondary" variant="dot" sx={{ cursor: 'pointer' }}>
+            <NotificationsNoneIcon sx={{ cursorL: 'pointer', color: 'primary.main'}}/>
           </Badge>
         </Tooltip>
 
         <Tooltip title="Help">
-          <HelpOutlineIcon sx={{cursor: 'pointer'}}/>
+          <HelpOutlineIcon sx={{ cursor: 'pointer', color: 'primary.main' }}/>
         </Tooltip>
 
         <Profiles/>
