@@ -31,7 +31,7 @@ function Starred() {
         onClick={handleClick}
         endIcon={<ExpandMoreIcon />}
       >
-        Workspaces
+        Starred
       </Button>
       <Menu
         id="basic-menu-starred"

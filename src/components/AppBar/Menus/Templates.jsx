@@ -31,7 +31,7 @@ function Templates() {
         onClick={handleClick}
         endIcon={<ExpandMoreIcon />}
       >
-        Workspaces
+        Templates
       </Button>
       <Menu
         id="basic-menu-templates"
