@@ -15,34 +15,38 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menus/Profiles'
-import theme from '~/theme'
-
+import Menu from './DrawerList/DrawerList'
 
 function AppBar() {
-  console.log(theme)
   return (
     <Box px={2} sx={{
       width: '100%',
       height: (theme) => theme.trello.appBarHeight,
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      gap: 2,
+      overflowX: 'auto'
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <AppsIcon sx={{ color: 'primary.main' }}/>
-        <Box sx={{ display:'flex', gap: 0.5, alignItems: 'center' }}>
-          <SvgIcon component={StarIcon} fontSize='small' inheritViewBox sx={{ color: 'primary.main' }}/>
-          <Typography variant='span' sx={{ color: 'primary.main', fontSize: '1.2rem', fontWeight: 'bold' }}>Trello</Typography>
+        <Box sx={{ display: { 'xs': 'flex', 'md': 'none' } }}>
+          <Menu />
         </Box>
-        <WorkSpaces />
-        <Recent/>
-        <Starred/>
-        <Templates/>
-
-        <Button variant="outlined">Create</Button>
+        <Box sx={{ display: { 'xs': 'none', 'md': 'flex' }, alignItems: 'center', gap: 1 }}>
+          <AppsIcon sx={{ color: 'primary.main' }}/>
+          <Box sx={{ display:'flex', gap: 0.5, alignItems: 'center' }}>
+            <SvgIcon component={StarIcon} fontSize='small' inheritViewBox sx={{ color: 'primary.main' }}/>
+            <Typography variant='span' sx={{ color: 'primary.main', fontSize: '1.2rem', fontWeight: 'bold' }}>Trello</Typography>
+          </Box>
+          <WorkSpaces />
+          <Recent/>
+          <Starred/>
+          <Templates/>
+          <Button variant="outlined">Create</Button>
+        </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField id="outlined-search" label="Search..." type="search" size='small' />
+        <TextField id="outlined-search" label="Search..." type="search" size='small' sx={{ minWidth: '120px' }}/>
         <ModeSelect/>
         <Tooltip title="Notification">
           <Badge color="secondary" variant="dot" sx={{ cursor: 'pointer' }}>
