@@ -1,4 +1,5 @@
-import { cyan, deepOrange, orange, teal } from '@mui/material/colors'
+import { Height } from '@mui/icons-material'
+import { cyan, deepOrange, orange, red, teal } from '@mui/material/colors'
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles'
 
 // Create a theme instance.
@@ -22,6 +23,24 @@ const theme = extendTheme({
     }
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        'html, body, & *': {
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#bdc3c7',
+            borderRadius: '8px'
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: '#00b894'
+          }
+        }
+      }
+
+    },
     // Name of the component
     MuiButton: {
       styleOverrides: {
