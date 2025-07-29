@@ -15,11 +15,9 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menus/Profiles'
-import theme from '~/theme'
 
 
 function AppBar() {
-  console.log(theme)
   return (
     <Box px={2} sx={{
       width: '100%',
