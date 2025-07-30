@@ -31,7 +31,7 @@ function Profiles() {
           aria-controls={open ? 'account-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
-        ><Avatar sx={{ width: 30, height: 30 }} alt='chuTus' src='https://image.tienphong.vn/w1966/Uploaded/2024/pgi-ubnvgunau/2024_05_29/444489138-1019981339484259-4504008877707254740-n-2092.jpg'/>
+        ><Avatar sx={{ width: 34, height: 34 }} alt='chuTus' src='https://image.tienphong.vn/w1966/Uploaded/2024/pgi-ubnvgunau/2024_05_29/444489138-1019981339484259-4504008877707254740-n-2092.jpg'/>
         </IconButton>
       </Tooltip>
       <Menu
@@ -42,10 +42,10 @@ function Profiles() {
         onClick={handleClose}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar sx={{ width: 30, height: 30 }} /> Profile
+          <Avatar sx={{ width: 34, height: 34 }} /> Profile
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <Avatar sx={{ width: 30, height: 30 }} /> My account
+          <Avatar sx={{ width: 34, height: 34 }} /> My account
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleClose}>
