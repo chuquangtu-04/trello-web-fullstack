@@ -85,7 +85,9 @@ function BoardBar() {
             width: '36px',
             height: '36px',
             fontSize: '16px',
-            border: 'none'
+            border: 'none',
+            cursor: 'pointer',
+            '&.MuiAvatar-colorDefault': { color: 'white', bgcolor: '#a4b0be' }
           }
         }}>
           <Tooltip title='QuangTuDev'>
