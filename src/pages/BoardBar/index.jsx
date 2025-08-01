@@ -33,10 +33,17 @@ function BoardBar() {
       justifyContent: 'space-between',
       gap: 2,
       overflowX: 'auto',
-      borderTop: '1px solid #00bf5a',
+      backgroundColor: (theme) => (theme.palette.mode === 'light' ? 'white' : '#34495e'),
+      borderBottom: '1px solid white',
       paddingX: 2
     }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={
+        { display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          '& .MuiButtonBase-root' : { backgroundColor: 'transparent' }
+        }
+      }>
         <Chip
           sx={MENU_STYLE}
           icon={<DashboardIcon />}
@@ -73,10 +80,12 @@ function BoardBar() {
         <Button variant="outlined" startIcon={<PersonAddIcon/>}>Invite</Button>
 
         <AvatarGroup max={6} sx={{
+          gap: 0.5,
           '& .MuiAvatar-root': {
-            width: '34px',
-            height: '34px',
-            fontSize: '16px'
+            width: '36px',
+            height: '36px',
+            fontSize: '16px',
+            border: 'none'
           }
         }}>
           <Tooltip title='QuangTuDev'>

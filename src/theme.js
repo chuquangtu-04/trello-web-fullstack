@@ -1,5 +1,4 @@
-import { Height } from '@mui/icons-material'
-import { cyan, deepOrange, orange, red, teal } from '@mui/material/colors'
+// import { cyan, deepOrange, orange, teal } from '@mui/material/colors'
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles'
 
 // Create a theme instance.
@@ -9,18 +8,18 @@ const theme = extendTheme({
     boardBarHeight: '60px'
   },
   colorSchemes: {
-    light: {
-      palette: {
-        primary: teal,
-        secondary: deepOrange
-      }
-    },
-    dark: {
-      palette: {
-        primary: cyan,
-        secondary: orange
-      }
-    }
+    // light: {
+    //   palette: {
+    //     primary: teal,
+    //     secondary: deepOrange
+    //   }
+    // },
+    // dark: {
+    //   palette: {
+    //     primary: cyan,
+    //     secondary: orange
+    //   }
+    // }
   },
   components: {
     MuiCssBaseline: {
@@ -31,11 +30,11 @@ const theme = extendTheme({
             height: '8px'
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#bdc3c7',
+            backgroundColor: '#dcdde1',
             borderRadius: '8px'
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#00b894'
+            backgroundColor: 'white'
           }
         }
       }
@@ -47,15 +46,16 @@ const theme = extendTheme({
         // Name of the slot
         root: {
           // Some CSS
-          textTransform: 'none'
+          textTransform: 'none',
+          borderWidth: '1px',
+          '&:hover': { borderWidth: '1.5px'}
         }
       }
     },
     MuiFormLabel: {
       styleOverrides: {
-        // Name of the slot
         root: ({ theme }) => ({
-          color: theme.palette.primary.main,
+          // color: theme.palette.primary.main,
           fontSize: '0.875rem'
 
         })
@@ -63,7 +63,6 @@ const theme = extendTheme({
     },
     MuiTouchRipple: {
       styleOverrides: {
-        // Name of the slot
         root: ({ theme }) => ({
           color: theme.palette.primary.main,
           fontSize: '0.875rem'
@@ -75,18 +74,21 @@ const theme = extendTheme({
       styleOverrides: {
         root: ({ theme }) => {
           return {
-            color: theme.palette.primary.main,
+            // color: theme.palette.primary.main,
             fontSize: '0.875rem',
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.primary.light
+            // '.MuiOutlinedInput-notchedOutline': {
+            //   borderColor: theme.palette.primary.light
+            // },
+            // '&:hover': {
+            //   '.MuiOutlinedInput-notchedOutline': {
+            //     borderColor: theme.palette.primary.main
+            //   }
+            // },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderWidth: '1.5px'
             },
-            '&:hover': {
-              '.MuiOutlinedInput-notchedOutline': {
-                borderColor: theme.palette.primary.main
-              }
-            },
-            '& fieldset': {
-              borderWith: '1px !important'
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderWidth: '1.5px'
             }
           }
         }
