@@ -2,7 +2,16 @@ import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/listColumns'
 import { mapOrder } from '~/utils/sorts'
 import { arrayMove } from '@dnd-kit/sortable'
-import { DndContext, PointerSensor, useSensor, useSensors, MouseSensor, TouchSensor, DragOverlay, defaultDropAnimationSideEffects } from '@dnd-kit/core'
+import { DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  closestCorners
+} from '@dnd-kit/core'
 import { useEffect, useState } from 'react'
 import { cloneDeep } from 'lodash'
 import Column from './ListColumns/Column/Column'
@@ -15,8 +24,10 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 
 function BoardContent({ board }) {
 
+
   // Yêu cầu chuột di chuyển 10px thì mới hoạt động event, fix trường hợp click gọi event
-  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
+  // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
+
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
 
   // Nhấn giữ 250ms và dung sai của cảm ứng 500px thì mới kích hoạt event
@@ -35,6 +46,8 @@ function BoardContent({ board }) {
   const [activeDragItemId, setActiveDragItemId] = useState(null)
   const [activeDragItemType, setActiveDragItemType] = useState(null)
   const [activeDragItemData, setActiveDragItemData] = useState(null)
+  const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] = useState(null)
+
 
   useEffect(() => {
     const orderedColumn = mapOrder(board?.columns, board?.columnOrderIds, '_id')
@@ -50,10 +63,18 @@ function BoardContent({ board }) {
 
   const handleDragStart = (event) => {
     // Trigger khi bắt đầu kéo (drap) một phần tử
+    console.log('event: ', event)
     setActiveDragItemId(event?.active?.id)
-    setActiveDragItemType(event?.active?.data?.current.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD :ACTIVE_DRAG_ITEM_TYPE.COLUMN )
+    setActiveDragItemType(event?.active?.data?.current.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN )
     setActiveDragItemData(event?.active?.data?.current)
+
+    // Nếu là kéo card thì mới thực hiện hành động set giá trị oldColumn
+    if (event?.active?.data?.current.columnId) {
+      setOldColumnWhenDraggingCard(findColumnByCardId(event?.active?.id))
+    }
   }
+
+
   // Trigger trong quá trình kéo (drap) một phần tử
   const handleOnDragOver = (event) => {
     // Không làm gì nếu đang kéo Column
@@ -116,42 +137,84 @@ function BoardContent({ board }) {
         return nextColumn
       })
     }
-
-
   }
 
   // Trigger khi kết thúc hành động kéo (drap) một phần tử => (drop)
   const handleDragEnd = (event) => {
-    // console.log(event)
+    const { active, over } = event
 
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
-      console.log('Hành động kéo thả Card - Tạm thời không làm gì cả')
-      return
+      // activeDraggingCardId là Card đang được kéo
+      const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active
+      // overCardId là card đang tương tác trên hoặc dưới so với cái card được kéo ở trên
+      const { id: overCardId } = over
+
+      // Tìm 2 cái columns theo cardId
+      const activeColumn = findColumnByCardId(activeDraggingCardId)
+      const overColumn = findColumnByCardId(overCardId)
+
+
+      // Nếu không tồn tại một trong hai column thì không làm gì hết, tránh cash trang web
+      if (!activeColumn || !overColumn) return
+
+      // Hành động kéo thả card giữa 2 column khác nhau
+      // Phải dùng tới activeDragItemData.columnId hoặc oldColumnWhenDraggingCard._id (set vào state từ bước handleDragStart)
+      // chứ không phải activeData trong scope handleDragEnd này vì sau khi đi qua onDragOver tới đây là state của card đã bị
+      //  cập nhật một lần rồi.
+      if (oldColumnWhenDraggingCard._id !== overColumn._id) {
+        // console.log('Hành động kéo thả card giữa hai column khác nhau')
+      } else {
+        const { cards } = orderedColumnState.find(c => c._id === oldColumnWhenDraggingCard._id)
+        //Lấy vị trí cũ ( từ  active )
+        const oldCardIndex = cards.findIndex(card => card._id === active.id)
+        //Lấy vị trí mới ( từ  over )
+        const newCardIndex = cards.findIndex(card => card._id === over.id)
+
+
+        const dndOrderedCards = arrayMove(oldColumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
+        setOrderedColumnState(prevColumn => {
+          const nextColumn = cloneDeep(prevColumn)
+          // Tìm tới cái column mà chúng ta đang thả
+          const targetColumn = nextColumn.find(c => c._id === oldColumnWhenDraggingCard._id)
+
+          // Cập nhật lại hai giá trị mới là card và cardOrdeIds trong cái targetColumn
+          targetColumn.cards = dndOrderedCards
+          targetColumn.cardOrderIds = dndOrderedCards.map(card => card._id)
+
+          // Trả về giá trị state mới ( chuẩn vị trí )
+          return nextColumn
+        }
+        )
+      }
     }
 
-    const { active, over } = event
     // Kiểm tra nếu không tồn tại over kéo linh tính ra ngoài thi return luôn tránh lỗi
     if (!over.id) return
 
-    // Nếu vị trí sau khi kéo thả khác với vị trí ban đầu
-    if (active.id !== over.id) {
-      //Lấy vị trí cũ ( từ  active )
-      const oldIndex = orderedColumnState.findIndex(c => c._id === active.id)
-      //Lấy vị trí mới ( từ  over )
-      const newIndex = orderedColumnState.findIndex(c => c._id === over.id)
+    // Xử lý kéo thả Column
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      // Nếu vị trí sau khi kéo thả khác với vị trí ban đầu
+      if (active.id !== over.id) {
+        //Lấy vị trí cũ ( từ  active )
+        const oldColumnIndex = orderedColumnState.findIndex(c => c._id === active.id)
+        //Lấy vị trí mới ( từ  over )
+        const newColumnIndex = orderedColumnState.findIndex(c => c._id === over.id)
 
-      // Dùng arrayMove của thằng dnd-kit để sắp xếp lại column ban đầu
-      // https://github.com/clauderic/dnd-kit/blob/master/packages/sortable/src/utilities/arrayMove.ts
-      const dndOrderedColumn = arrayMove(orderedColumnState, oldIndex, newIndex)
+        // Dùng arrayMove của thằng dnd-kit để sắp xếp lại column ban đầu
+        // https://github.com/clauderic/dnd-kit/blob/master/packages/sortable/src/utilities/arrayMove.ts
+        const dndOrderedColumn = arrayMove(orderedColumnState, oldColumnIndex, newColumnIndex)
 
-      // Cập nhật lại state column ban đầu sau khi kéo thả
-      setOrderedColumnState(dndOrderedColumn)
-      // Cập nhập lại dự liệu lên db
-      // const dndOrderedColumnIds = dndOrderedColumn.map(c => c._id)
+        // Cập nhật lại state column ban đầu sau khi kéo thả
+        setOrderedColumnState(dndOrderedColumn)
+        // Cập nhập lại dự liệu lên db
+        // const dndOrderedColumnIds = dndOrderedColumn.map(c => c._id)
+      }
     }
+    // Những dữ liệu sau khi kéo thả này luôn phải đưa về giá trị null mặc định ban đầu
     setActiveDragItemId(null)
     setActiveDragItemType(null)
     setActiveDragItemData(null)
+    setOldColumnWhenDraggingCard(null)
   }
   const customerDropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
@@ -164,10 +227,14 @@ function BoardContent({ board }) {
   }
   return (
     <DndContext
+      sensors={mySensors}
+      // Thuật toán phát hiện va chạm (nếu không có nó thì card với cover lớn sẽ không kéo qua Column được vì lúc này nó đang bị conflict giữa card và column),
+      // chúng ta sẽ dùng closestCorners thay vì closestCenter
+      // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleOnDragOver}
       onDragEnd={handleDragEnd}
-      sensors={mySensors}
     >
       <Box sx={{
         backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#1976d2' : '#34495e'),
@@ -183,7 +250,6 @@ function BoardContent({ board }) {
         </DragOverlay>
       </Box>
     </DndContext>
-  )
-}
+  )}
 
 export default BoardContent
