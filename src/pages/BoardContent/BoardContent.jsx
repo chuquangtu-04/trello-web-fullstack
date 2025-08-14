@@ -3,7 +3,7 @@ import ListColumns from './ListColumns/listColumns'
 import { mapOrder } from '~/utils/sorts'
 import { arrayMove } from '@dnd-kit/sortable'
 import { DndContext,
-  PointerSensor,
+  // PointerSensor,
   useSensor,
   useSensors,
   MouseSensor,
@@ -12,7 +12,7 @@ import { DndContext,
   defaultDropAnimationSideEffects,
   closestCorners,
   pointerWithin,
-  rectIntersection,
+  // rectIntersection,
   getFirstCollision,
   closestCenter
 } from '@dnd-kit/core'
@@ -137,7 +137,7 @@ function BoardContent({ board }) {
     const { active, over } = event
     // Cần đam bảo nếu không tồn tại active hoặc over (khi kéo ra khỏi phạm vi container) thì không làm gì
     // ( tránh crash trang )
-    if (!active || !over.id) return
+    if (!active || !over) return
 
     // activeDraggingCardId là Card đang được kéo
     const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active
@@ -340,11 +340,15 @@ function BoardContent({ board }) {
     }
     // Tìm các điểm giao nhau, va chạm - intersettions với con trỏ
     const pointerIntersections = pointerWithin(args)
-    const intersettions = !!pointerIntersections?.length
-      ? pointerIntersections
-      : rectIntersection(args)
+    // Fix triệt để cái bug flickering của thư viện Dnd-kit trong trường hợp sau:
+    // -- Kéo một cái card có image cover lớn và kéo lên phía trên cùng ra khỏi khu vực kéo thả
+    if ( !pointerIntersections?.length ) return
+    // const intersettions = !!pointerIntersections?.length
+    //   ? pointerIntersections
+    //   : rectIntersection(args)
+
     // Tìm overId đầu tiên trong đám intersections ở trên
-    let overId = getFirstCollision(intersettions, 'id')
+    let overId = getFirstCollision(pointerIntersections, 'id')
     if (overId) {
       // Nếu cái over nó là column thì sẽ tìm tới cái cardId gần nhất bên trong khu vực va chạm đó dựa vào
       // thuật toán phát hiện va chạm closestCenter hoặc closestCorners đều được. Tuy nhiên ở đây dùng
