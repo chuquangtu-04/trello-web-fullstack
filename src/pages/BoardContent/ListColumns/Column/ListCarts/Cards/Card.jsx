@@ -36,7 +36,8 @@ function Card({ card }) {
         {
           cursor: 'pointer',
           overflow: 'unset',
-          boxShadow: '0 1px 1px rgba(0, 0, 0, 0.2)'
+          boxShadow: '0 1px 1px rgba(0, 0, 0, 0.2)',
+          display:  card.FE_placeholderCard ? 'none' : 'block'
         }
       }>
       { card?.cover && <CardMedia sx={{ height: 140 }} image={card.cover} title={card.title}/> }
