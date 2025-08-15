@@ -1,26 +1,27 @@
-import Box from '@mui/material/Box'
-import ListColumns from './ListColumns/listColumns'
-import { mapOrder } from '~/utils/sorts'
-import { arrayMove } from '@dnd-kit/sortable'
-import { DndContext,
-  // PointerSensor,
-  useSensor,
-  useSensors,
+import {
+  DndContext,
+  DragOverlay,
   MouseSensor,
   TouchSensor,
-  DragOverlay,
-  defaultDropAnimationSideEffects,
+  closestCenter,
   closestCorners,
-  pointerWithin,
+  defaultDropAnimationSideEffects,
   // rectIntersection,
   getFirstCollision,
-  closestCenter
+  pointerWithin,
+  // PointerSensor,
+  useSensor,
+  useSensors
 } from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
+import Box from '@mui/material/Box'
+import { cloneDeep, isEmpty } from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { after, cloneDeep } from 'lodash'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import { mapOrder } from '~/utils/sorts'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCarts/Cards/Card'
-import { CloseFullscreen } from '@mui/icons-material'
+import ListColumns from './ListColumns/listColumns'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -91,6 +92,11 @@ function BoardContent({ board }) {
       if (nextActiveColumn) {
         // Lấy card ở cái column active (cũng có thể hiểu là column cũ, cái lúc mà kéo card ra khỏi nó để sang column khác)
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId )
+
+        // Thêm Placeholder nếu column rỗng bị kéo hết card đi, không còn cái nào
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
         //Cập nhật lại mảng cardOrderIds cho chuẩn dữ liệu
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
@@ -109,6 +115,8 @@ function BoardContent({ board }) {
         //Thêm Card đang kéo vào OverColumn theo vị trí index mới
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
 
+        // Xóa các Placeholder đi nêu trong card có ít nhất một dữ liệu thẻ card
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_placeholderCard)
         //Cập nhật lại mảng cardOrderIds cho chuẩn dữ liệu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
