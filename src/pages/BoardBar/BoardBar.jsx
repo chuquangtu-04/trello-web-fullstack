@@ -45,18 +45,22 @@ function BoardBar({ board }) {
           '& .MuiButtonBase-root' : { backgroundColor: 'transparent' }
         }
       }>
-        <Chip
-          sx={MENU_STYLE}
-          icon={<DashboardIcon />}
-          label={board?.title}
-          onClick={() => {}}
-        />
-        <Chip
-          sx={MENU_STYLE}
-          icon={<VpnLockIcon />}
-          label={capitalizeFirstLetter(board?.type)}
-          onClick={() => {}}
-        />
+        <Tooltip title={board?.description}>
+          <Chip
+            sx={MENU_STYLE}
+            icon={<DashboardIcon />}
+            label={board?.title}
+            onClick={() => {}}
+          />
+        </Tooltip>
+        <Tooltip title={board?.type}>
+          <Chip
+            sx={MENU_STYLE}
+            icon={<VpnLockIcon />}
+            label={capitalizeFirstLetter(board?.type)}
+            onClick={() => {}}
+          />
+        </Tooltip>
         <Chip
           sx={MENU_STYLE}
           icon={<AddToDriveIcon />}
