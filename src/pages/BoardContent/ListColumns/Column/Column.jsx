@@ -8,6 +8,7 @@ import DragHandleIcon from '@mui/icons-material/DragHandle'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, Typography } from '@mui/material'
 import Box from '@mui/material/Box'
+import CloseIcon from '@mui/icons-material/Close'
 import Divider from '@mui/material/Divider'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
@@ -19,6 +20,8 @@ import ListCards from './ListCarts/listCards'
 import { mapOrder } from '~/utils/sorts'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
+import TextField from '@mui/material/TextField'
+import theme from '~/theme'
 
 
 function Column({ column }) {
@@ -37,6 +40,20 @@ function Column({ column }) {
     transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? '0.5' : undefined
+  }
+
+  const [openNewCardFrom, setOpenNewCardFrom] = useState(false)
+  const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
+  const [newCardTitle, setNewCardTitle] = useState('')
+  const addNewCard = () => {
+    if (!newCardTitle) {
+      // console.error('Please enter Card title')
+      return
+    }
+    // Gọi API
+    // console.log('titleCard', newCardTitle)
+    setNewCardTitle('')
+    toggleOpenNewCardFrom()
   }
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -123,7 +140,7 @@ function Column({ column }) {
               <MenuItem onClick={handleClose}>
                 <ListItemIcon><ContentCopy fontSize="small" /></ListItemIcon>
                 <ListItemText>Copy</ListItemText>
-              </MenuItem>
+              </MenuItem>t
               <MenuItem onClick={handleClose}>
                 <ListItemIcon><ContentPaste fontSize="small" /></ListItemIcon>
                 <ListItemText>Paste</ListItemText>
@@ -146,18 +163,83 @@ function Column({ column }) {
         <Box sx={
           {
             height: ( theme ) => (theme.trello.column_footer_height),
-            p: 2,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            p: 2
           }
         }>
-          <Button startIcon={<AddCardIcon/>}>Add new cart</Button>
-          <Tooltip title='Drag to move'>
-            <DragHandleIcon sx={{
-              cursor: 'pointer'
-            }}/>
-          </Tooltip>
+          {
+            !openNewCardFrom
+              ?
+              <Box sx={{
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Button
+                  onClick={toggleOpenNewCardFrom}
+                  startIcon={<AddCardIcon/>}
+                >
+                Add new cart</Button>
+                <Tooltip title='Drag to move'>
+                  <DragHandleIcon sx={{
+                    cursor: 'pointer'
+                  }}/>
+                </Tooltip>
+              </Box>
+              :
+              <Box sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <TextField
+                  value={newCardTitle}
+                  onChange={(e) => {setNewCardTitle(e.target.value)}}
+                  spellCheck={false}
+                  label="Enter Card title..."
+                  type="text"
+                  size='small'
+                  variant='outlined'
+                  autoFocus
+                  // value={searchValue}
+                  // onChange={(e) => setSearchValue(e.target.value)}
+                  sx={
+                    {
+                      width: '100%',
+                      '& label': { color: (theme) => theme.palette.primary.light },
+                      '& input': { color: (theme) => theme.palette.text.primary },
+                      '& label.Mui-focused': { color: (theme) => theme.palette.primary.light },
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: (theme) => theme.palette.primary.light },
+                        '&:hover fieldset': { borderColor: (theme) => theme.palette.primary.light },
+                        '&.Mui-focused fieldset': { borderColor: (theme) => theme.palette.primary.light}
+                      }
+                    }
+                  }/>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  <Button variant='contained' size='small'
+                    onClick={addNewCard}
+                  >Add</Button>
+                  <CloseIcon onClick={toggleOpenNewCardFrom}
+                    fontSize='small'
+                    sx={
+                      {
+                        color: (theme) => theme.palette.info.main,
+                        cursor: 'pointer',
+                        '&:hover': {
+                          color: (theme) => theme.palette.info.main
+                        }
+                      }
+                    }
+                  />
+                </Box>
+              </Box>
+          }
         </Box>
       </Box>
     </div>
