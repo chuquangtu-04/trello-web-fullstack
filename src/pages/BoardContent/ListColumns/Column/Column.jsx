@@ -21,7 +21,6 @@ import { mapOrder } from '~/utils/sorts'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
 import TextField from '@mui/material/TextField'
-import theme from '~/theme'
 
 
 function Column({ column }) {
@@ -187,7 +186,7 @@ function Column({ column }) {
                 </Tooltip>
               </Box>
               :
-              <Box sx={{
+              <Box data-no-dnd="true" sx={{
                 height: '100%',
                 display: 'flex',
                 alignItems: 'center',

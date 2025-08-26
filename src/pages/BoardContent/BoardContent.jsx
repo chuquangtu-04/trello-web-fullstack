@@ -1,8 +1,6 @@
 import {
   DndContext,
   DragOverlay,
-  MouseSensor,
-  TouchSensor,
   closestCenter,
   closestCorners,
   defaultDropAnimationSideEffects,
@@ -22,6 +20,7 @@ import { mapOrder } from '~/utils/sorts'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCarts/Cards/Card'
 import ListColumns from './ListColumns/listColumns'
+import { CustomMouseSensor, CustomTouchSensor} from '~/CustomLibraries/customSensors'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -34,10 +33,11 @@ function BoardContent({ board }) {
   // Yêu cầu chuột di chuyển 10px thì mới hoạt động event, fix trường hợp click gọi event
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
-  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
+  const mouseSensor = useSensor(CustomMouseSensor, { activationConstraint: { distance: 10 } })
 
   // Nhấn giữ 250ms và dung sai của cảm ứng 500px thì mới kích hoạt event
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } })
+  const touchSensor = useSensor(CustomTouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } })
+
 
   // Ưu tiên sử dụng kết hợp 2 loại sensors là mouse và touch để có
   // trải nghiệp trên mobie tốt nhấp, không bị bug
