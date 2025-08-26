@@ -6,8 +6,12 @@ const request = axios.create({
 })
 
 export const get = async (path, option= {}) => {
-  const response = await request.get(path, option)
-  return response.data
+  try {
+    const response = await request.get(path, option)
+    return response.data
+  } catch (error) {
+    console.log(error.status)
+  }
 }
 export const post = async (path, option= {}) => {
   const response = await request.post(path, option)
