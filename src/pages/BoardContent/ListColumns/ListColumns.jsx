@@ -6,6 +6,7 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { useState } from 'react'
 import Column from './Column/column'
+import { toast } from 'react-toastify'
 
 
 function ListColumns({ columns }) {
@@ -14,7 +15,7 @@ function ListColumns({ columns }) {
   const [newColumnTitle, setNewColumnTitle] = useState('')
   const addNewColumn = () => {
     if (!newColumnTitle) {
-      // console.error('Please enter column title')
+      toast.error('Please enter column title')
       return
     }
     // Gọi API
