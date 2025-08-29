@@ -24,7 +24,14 @@ import TextField from '@mui/material/TextField'
 import { toast } from 'react-toastify'
 
 
-function Column({ column }) {
+function Column({ column, createNewCard }) {
+  const [openNewCardFrom, setOpenNewCardFrom] = useState(false)
+  const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
+  const [newCardTitle, setNewCardTitle] = useState('')
+  const [anchorEl, setAnchorEl] = useState(null)
+  const orderedCard = mapOrder(column?.cards, column.cardOrderIds, '_id')
+  const open = Boolean(anchorEl)
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -42,29 +49,33 @@ function Column({ column }) {
     opacity: isDragging ? '0.5' : undefined
   }
 
-  const [openNewCardFrom, setOpenNewCardFrom] = useState(false)
-  const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
-  const [newCardTitle, setNewCardTitle] = useState('')
-  const addNewCard = () => {
-    if (!newCardTitle) {
-      toast.error('Please enter Card title', { position: 'bottom-right' })
-      return
-    }
-    // Gọi API
-    // console.log('titleCard', newCardTitle)
-    setNewCardTitle('')
-    toggleOpenNewCardFrom()
-  }
-
-  const [anchorEl, setAnchorEl] = useState(null)
-  const orderedCard = mapOrder(column?.cards, column.cardOrderIds, '_id')
-  const open = Boolean(anchorEl)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const addNewCard = async () => {
+    if (!newCardTitle) {
+      toast.error('Please enter Card title', { position: 'bottom-right' })
+      return
+    }
+    const newCaredData = {
+      title: newCardTitle,
+      columnId: column._id
+    }
+    //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
+    // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
+    //   đưa dữ liệu Board ra ngoài Redux Global Store,
+    // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
+    //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
+    // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
+    await createNewCard(newCaredData)
+    setNewCardTitle('')
+    toggleOpenNewCardFrom()
+  }
+
   // Nếu không bọc, khi kéo thả các cột (column) có thể gặp lỗi hiển thị nhấp nháy (flickering)
   // do chiều cao không được tính toán đúng — đặc biệt là khi kết hợp với animation hoặc auto layout.
   // Luôn đảm bảo wrapper (div hoặc section, Box,...) có chiều cao rõ ràng hoặc minHeight, height: 100%
@@ -213,7 +224,7 @@ function Column({ column }) {
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': { borderColor: (theme) => theme.palette.primary.light },
                         '&:hover fieldset': { borderColor: (theme) => theme.palette.primary.light },
-                        '&.Mui-focused fieldset': { borderColor: (theme) => theme.palette.primary.light}
+                        '&.Mui-focused fieldset': { borderColor: (theme) => theme.palette.primary.light }
                       }
                     }
                   }/>
