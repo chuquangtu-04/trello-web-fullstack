@@ -1,7 +1,12 @@
-import { get, post } from '~/utils/httpRequest'
+import { get, post, put } from '~/utils/httpRequest'
 // Board
 export const fetchBoardDetailsAPI = async (id) => {
   const res = await get(`boards/${id}`)
+  return res.data
+}
+
+export const updateBoardDetailsAPI = async (boardId, newCardData) => {
+  const res = await put(`boards/${boardId}`, newCardData)
   return res.data
 }
 // Column

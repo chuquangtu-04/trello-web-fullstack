@@ -20,14 +20,14 @@ import { mapOrder } from '~/utils/sorts'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCarts/Cards/Card'
 import ListColumns from './ListColumns/listColumns'
-import { CustomMouseSensor, CustomTouchSensor} from '~/CustomLibraries/customSensors'
+import { CustomMouseSensor, CustomTouchSensor } from '~/CustomLibraries/customSensors'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board, createNewColumn, createNewCard }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumn }) {
 
 
   // Yêu cầu chuột di chuyển 10px thì mới hoạt động event, fix trường hợp click gọi event
@@ -237,10 +237,17 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         // https://github.com/clauderic/dnd-kit/blob/master/packages/sortable/src/utilities/arrayMove.ts
         const dndOrderedColumn = arrayMove(orderedColumnState, oldColumnIndex, newColumnIndex)
 
+        //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
+        // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
+        //   đưa dữ liệu Board ra ngoài Redux Global Store,
+        // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
+        //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
+        // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
+        moveColumn(dndOrderedColumn)
+
         // Cập nhật lại state column ban đầu sau khi kéo thả
+        // Vẫn gọi update State ở đây để tránh delay hoặc Flickring giao diện lúc kéo thả cần phải gọi lại api (small trick)
         setOrderedColumnState(dndOrderedColumn)
-        // Cập nhập lại dự liệu lên db
-        // const dndOrderedColumnIds = dndOrderedColumn.map(c => c._id)
       }
     }
     // Những dữ liệu sau khi kéo thả này luôn phải đưa về giá trị null mặc định ban đầu

@@ -20,3 +20,8 @@ export const post = async (path, option= {}) => {
   const response = await request.post(path, option)
   return response
 }
+// Method put
+export const put = async (path, option= {}) => {
+  const response = await request.put(path, option)
+  return response
+}
