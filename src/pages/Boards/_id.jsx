@@ -4,9 +4,9 @@ import BoardBar from '../BoardBar/BoardBar'
 import BoardContent from '../BoardContent/BoardContent'
 // import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailsAPI, CreateNewColumn, CreateNewCard, updateBoardDetailsAPI} from '~/apis'
+import { fetchBoardDetailsAPI, CreateNewColumn, CreateNewCard, updateBoardDetailsAPI, updateCardInColumn, updateCardOutColumn } from '~/apis'
 import { generatePlaceholderCard } from '~/utils/formatters'
-import { isEmpty } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
 
 function Board() {
   const [board, setBoard] = useState(null)
@@ -82,6 +82,59 @@ function Board() {
     //Gọi Api update Board
     updateBoardDetailsAPI(board._id, { columnOrderIds: dndOrderedColumnIds })
   }
+  // Fn này có nhiệm vụ gọi Api và xử lý khi kéo thả Card trong column xong xuôi
+  const moveCardInColumn = (dndOrderedCards, dndOrderedCardsIds, columnId) => {
+    // Update cho chuẩn dữ liệu state Board
+    const newBoard = { ...board }
+    setBoard(newBoard)
+    newBoard.columns.forEach(column => {
+      if (column._id === columnId) {
+        column.cardOrderIds = dndOrderedCardsIds
+        column.cards = dndOrderedCards
+      }
+    })
+    setBoard(newBoard)
+
+    // Gọi Api update CardInColumn
+    updateCardInColumn(columnId, { cardOrderIds: dndOrderedCardsIds })
+  }
+
+  const moveCardOutColumn = (activeColumnId, overColumnId, CardActiveData, CardOverData, activeDraggingCardId) => {
+    const newBoard = { ...board }
+    setBoard(newBoard)
+    // Active Card
+    newBoard.columns.forEach(column => {
+      if (column._id === activeColumnId) {
+        column.cardOrderIds = CardActiveData.cardOrderIds
+        column.cards = CardActiveData.cards
+      }
+    })
+    // Over Card
+    newBoard.columns.forEach(column => {
+      if (column._id === overColumnId) {
+        column.cardOrderIds = CardOverData.cardOrderIds
+        column.cards = CardOverData.cards
+      }
+    })
+    setBoard(newBoard)
+
+    const cloneCardActiveData = cloneDeep(CardActiveData)
+
+    if (cloneCardActiveData.cardOrderIds.includes(`${cloneCardActiveData._id}-placeholder-card`)) {
+      cloneCardActiveData.cardOrderIds = []
+      cloneCardActiveData.cards = []
+    }
+
+    const newColumnData = {
+      activeColumnId: activeColumnId,
+      overColumnId: overColumnId,
+      activeCardId: activeDraggingCardId,
+      columnActiveOrderIds: { cardOrderIds: cloneCardActiveData.cardOrderIds },
+      columnOverOrderIds: { cardOrderIds: CardOverData.cardOrderIds }
+    }
+
+    updateCardOutColumn(newColumnData)
+  }
 
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
@@ -91,6 +144,8 @@ function Board() {
         createNewColumn={createNewColumn}
         createNewCard={createNewCard}
         moveColumn={moveColumn}
+        moveCardInColumn={moveCardInColumn}
+        moveCardOutColumn={moveCardOutColumn}
         board={board}/>
     </Container>
   )

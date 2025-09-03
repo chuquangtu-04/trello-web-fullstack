@@ -20,3 +20,11 @@ export const CreateNewCard = async (newCardData) => {
   const res = await post('cards', newCardData)
   return res.data
 }
+export const updateCardInColumn = async (columnId, newColumnData) => {
+  const res = await put(`columns/${columnId}`, newColumnData)
+  return res.data
+}
+export const updateCardOutColumn = async (newColumnData) => {
+  const res = await put('columns', newColumnData)
+  return res.data
+}
