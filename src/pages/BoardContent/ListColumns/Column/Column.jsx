@@ -17,7 +17,6 @@ import MenuItem from '@mui/material/MenuItem'
 import Tooltip from '@mui/material/Tooltip'
 import { useState } from 'react'
 import ListCards from './ListCarts/listCards'
-import { mapOrder } from '~/utils/sorts'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
 import TextField from '@mui/material/TextField'
@@ -29,7 +28,7 @@ function Column({ column, createNewCard }) {
   const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
   const [newCardTitle, setNewCardTitle] = useState('')
   const [anchorEl, setAnchorEl] = useState(null)
-  const orderedCard = mapOrder(column?.cards, column.cardOrderIds, '_id')
+  const orderedCard = column.cards
   const open = Boolean(anchorEl)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
