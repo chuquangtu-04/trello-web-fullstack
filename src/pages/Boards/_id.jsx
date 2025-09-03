@@ -2,11 +2,15 @@ import Container from '@mui/material/Container'
 import AppBar from '~/components/AppBar/AppBar'
 import BoardBar from '../BoardBar/BoardBar'
 import BoardContent from '../BoardContent/BoardContent'
+import { mapOrder } from '~/utils/sorts'
+import CircularProgress from '@mui/material/CircularProgress'
+
 // import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
 import { fetchBoardDetailsAPI, CreateNewColumn, CreateNewCard, updateBoardDetailsAPI, updateCardInColumn, updateCardOutColumn } from '~/apis'
 import { generatePlaceholderCard } from '~/utils/formatters'
 import { cloneDeep, isEmpty } from 'lodash'
+import { Box, Typography } from '@mui/material'
 
 function Board() {
   const [board, setBoard] = useState(null)
@@ -14,14 +18,20 @@ function Board() {
   // Call Api
   useEffect(() => {
     ( async () => {
-      const result = await fetchBoardDetailsAPI(boardId)
-      result.columns.forEach(column => {
+      const board = await fetchBoardDetailsAPI(boardId)
+
+      // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ liệu xuống bên dưới các component
+      board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
+      board.columns.forEach(column => {
         if (isEmpty(column.cards)) {
           column.cards = [generatePlaceholderCard(column)],
           column.cardOrderIds = [generatePlaceholderCard(column)._id]
+        } else {
+          // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ liệu xuống bên dưới các component
+          column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
         }
       })
-      setBoard(result)
+      setBoard(board)
     })()
   }, [])
   //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
@@ -134,6 +144,21 @@ function Board() {
     }
 
     updateCardOutColumn(newColumnData)
+  }
+
+  if (!board) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        gap: 2
+      }}>
+        <CircularProgress />
+        <Typography>Loading board...</Typography>
+      </Box>
+    )
   }
 
   return (

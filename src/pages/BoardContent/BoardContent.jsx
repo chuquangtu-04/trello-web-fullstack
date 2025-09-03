@@ -16,7 +16,6 @@ import Box from '@mui/material/Box'
 import { cloneDeep, isEmpty } from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { generatePlaceholderCard } from '~/utils/formatters'
-import { mapOrder } from '~/utils/sorts'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCarts/Cards/Card'
 import ListColumns from './ListColumns/listColumns'
@@ -59,8 +58,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumn, moveC
 
 
   useEffect(() => {
-    const orderedColumn = mapOrder(board?.columns, board?.columnOrderIds, '_id')
-    setOrderedColumnState(orderedColumn)
+    // Column đã được sắp xếp ở component cha cao nhất
+    setOrderedColumnState(board.columns)
   }, [board])
 
   // Tìm một cái Column theo cardId
