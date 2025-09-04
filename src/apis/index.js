@@ -25,6 +25,6 @@ export const updateCardInColumn = async (columnId, newColumnData) => {
   return res.data
 }
 export const updateCardOutColumn = async (newColumnData) => {
-  const res = await put('columns', newColumnData)
+  const res = await put('columns/moving_card', newColumnData)
   return res.data
 }

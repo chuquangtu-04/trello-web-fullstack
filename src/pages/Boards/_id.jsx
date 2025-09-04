@@ -68,8 +68,13 @@ function Board() {
     const newBoard = { ...board }
     newBoard.columns.forEach(column => {
       if (column._id === createdNewCard.columnId) {
-        column.cards.push(createdNewCard)
-        column.cardOrderIds.push(createdNewCard._id)
+        if (column.cards.some(card => card.FE_placeholderCard)) {
+          column.cards = [createdNewCard]
+          column.cardOrderIds = [createdNewCard._id]
+        } else {
+          column.cards.push(createdNewCard)
+          column.cardOrderIds.push(createdNewCard._id)
+        }
       }
     })
     // const columnToUpdate = newBoard.columns.find(column => column._id === createNewCard.columnId)
@@ -129,7 +134,8 @@ function Board() {
     setBoard(newBoard)
 
     const cloneCardActiveData = cloneDeep(CardActiveData)
-
+    // Xử lý vấn đề khi kéo card cuối cùng ra khỏi column, Column rỗng sẽ có placeholder-card cần xóa nó đi
+    // trước khi gửi dữ liệu lên cho phía backend
     if (cloneCardActiveData.cardOrderIds.includes(`${cloneCardActiveData._id}-placeholder-card`)) {
       cloneCardActiveData.cardOrderIds = []
       cloneCardActiveData.cards = []
