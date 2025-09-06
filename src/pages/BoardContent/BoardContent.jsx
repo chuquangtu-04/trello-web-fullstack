@@ -26,7 +26,15 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board, createNewColumn, createNewCard, moveColumn, moveCardInColumn, moveCardOutColumn }) {
+function BoardContent({
+  board,
+  createNewColumn,
+  createNewCard,
+  moveColumn,
+  moveCardInColumn,
+  moveCardOutColumn,
+  deleteColumn
+}) {
 
 
   // Yêu cầu chuột di chuyển 10px thì mới hoạt động event, fix trường hợp click gọi event
@@ -334,6 +342,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumn, moveC
         <ListColumns
           createNewColumn={createNewColumn}
           createNewCard={createNewCard}
+          deleteColumn= {deleteColumn}
           columns={orderedColumnState}/>
         <DragOverlay dropAnimation={customerDropAnimation}>
           {activeDragItemType && null}

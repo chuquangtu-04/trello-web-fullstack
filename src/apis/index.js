@@ -1,4 +1,4 @@
-import { get, post, put } from '~/utils/httpRequest'
+import { get, post, put, patch } from '~/utils/httpRequest'
 // Board
 export const fetchBoardDetailsAPI = async (id) => {
   const res = await get(`boards/${id}`)
@@ -10,21 +10,26 @@ export const updateBoardDetailsAPI = async (boardId, newCardData) => {
   return res.data
 }
 // Column
-export const CreateNewColumn = async (newColumnData) => {
+export const createNewColumnAPI = async (newColumnData) => {
   const res = await post('columns', newColumnData)
+  return res.data
+}
+// Xóa mềm Column
+export const deleteColumnAPI = async (deleteColumnData) => {
+  const res = await patch('columns/soft-delete', deleteColumnData)
   return res.data
 }
 
 // Card
-export const CreateNewCard = async (newCardData) => {
+export const createNewCardAPI = async (newCardData) => {
   const res = await post('cards', newCardData)
   return res.data
 }
-export const updateCardInColumn = async (columnId, newColumnData) => {
+export const updateCardInColumnAPI = async (columnId, newColumnData) => {
   const res = await put(`columns/${columnId}`, newColumnData)
   return res.data
 }
-export const updateCardOutColumn = async (newColumnData) => {
+export const updateCardOutColumnAPI = async (newColumnData) => {
   const res = await put('columns/moving_card', newColumnData)
   return res.data
 }

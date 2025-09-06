@@ -7,7 +7,15 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 // import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailsAPI, CreateNewColumn, CreateNewCard, updateBoardDetailsAPI, updateCardInColumn, updateCardOutColumn } from '~/apis'
+import {
+  fetchBoardDetailsAPI,
+  createNewColumnAPI,
+  createNewCardAPI,
+  updateBoardDetailsAPI,
+  updateCardInColumnAPI,
+  updateCardOutColumnAPI,
+  deleteColumnAPI
+} from '~/apis'
 import { generatePlaceholderCard } from '~/utils/formatters'
 import { cloneDeep, isEmpty } from 'lodash'
 import { Box, Typography } from '@mui/material'
@@ -47,7 +55,7 @@ function Board() {
   // Lưu ý: cách làm này phụ thuộc vào tùy lựa chọn và đặc thù dự án, có nơi thì BE sẽ hỗ trợ trả về luôn toàn bộ Board dù đây có là api tạo Column hay Card đi chăng nữa. => Lúc này FE sẽ nhàn hơn.
 
   const createNewColumn = async (newColumnData) => {
-    const createNewColumn = await CreateNewColumn({
+    const createNewColumn = await createNewColumnAPI({
       ...newColumnData,
       boardId: board._id
     })
@@ -64,7 +72,7 @@ function Board() {
   // Lưu ý: cách làm này phụ thuộc vào tùy lựa chọn và đặc thù dự án, có nơi thì BE sẽ hỗ trợ trả về luôn toàn bộ Board dù đây có là api tạo Column hay Card đi chăng nữa. => Lúc này FE sẽ nhàn hơn.
 
   const createNewCard = async (createNewCard) => {
-    const createdNewCard = await CreateNewCard({ ...createNewCard, boardId: board._id })
+    const createdNewCard = await createNewCardAPI({ ...createNewCard, boardId: board._id })
     const newBoard = { ...board }
     newBoard.columns.forEach(column => {
       if (column._id === createdNewCard.columnId) {
@@ -111,12 +119,11 @@ function Board() {
     setBoard(newBoard)
 
     // Gọi Api update CardInColumn
-    updateCardInColumn(columnId, { cardOrderIds: dndOrderedCardsIds })
+    updateCardInColumnAPI(columnId, { cardOrderIds: dndOrderedCardsIds })
   }
 
   const moveCardOutColumn = (activeColumnId, overColumnId, CardActiveData, CardOverData, activeDraggingCardId) => {
     const newBoard = { ...board }
-    setBoard(newBoard)
     // Active Card
     newBoard.columns.forEach(column => {
       if (column._id === activeColumnId) {
@@ -149,7 +156,23 @@ function Board() {
       columnOverOrderIds: { cardOrderIds: CardOverData.cardOrderIds }
     }
 
-    updateCardOutColumn(newColumnData)
+    updateCardOutColumnAPI(newColumnData)
+  }
+
+  // Xóa Column
+  const deleteColumn = (columnData) => {
+    // Update Lại dự liệu cho chuẩn state board
+    const newBoard = { ...board }
+    if (!columnData) return
+    newBoard.columns = newBoard.columns.filter(c => c._id != columnData._id)
+    newBoard.columnOrderIds = newBoard.columnOrderIds.filter(c => c != columnData._id)
+    setBoard(newBoard)
+    // Gọi Api xử lý phía backend
+    // Xử lý column nếu không có card
+    if (columnData.cardOrderIds.includes(`${columnData._id}-placeholder-card`)) {
+      columnData.cardOrderIds = []
+    }
+    deleteColumnAPI({ columnId: columnData._id })
   }
 
   if (!board) {
@@ -177,6 +200,7 @@ function Board() {
         moveColumn={moveColumn}
         moveCardInColumn={moveCardInColumn}
         moveCardOutColumn={moveCardOutColumn}
+        deleteColumn={deleteColumn}
         board={board}/>
     </Container>
   )
