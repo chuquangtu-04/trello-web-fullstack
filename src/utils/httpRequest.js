@@ -25,3 +25,9 @@ export const put = async (path, option= {}) => {
   const response = await request.put(path, option)
   return response
 }
+
+// Method patch
+export const patch = async (path, option= {}) => {
+  const response = await request.patch(path, option)
+  return response
+}

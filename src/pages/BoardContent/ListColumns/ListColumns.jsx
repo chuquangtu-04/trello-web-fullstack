@@ -9,7 +9,7 @@ import Column from './Column/column'
 import { toast } from 'react-toastify'
 
 
-function ListColumns({ columns, createNewColumn, createNewCard }) {
+function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) {
   const [openNewColumnFrom, setOpenNewColumnFrom] = useState(false)
   const toggleOpenNewColumnFrom = () => setOpenNewColumnFrom(!openNewColumnFrom)
   const [newColumnTitle, setNewColumnTitle] = useState('')
@@ -45,7 +45,7 @@ function ListColumns({ columns, createNewColumn, createNewCard }) {
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
         {
-          columns.map(column => (<Column key={column._id} column={column} createNewCard={createNewCard}/>))
+          columns.map(column => (<Column key={column._id} column={column} createNewCard={createNewCard} deleteColumn={deleteColumn}/>))
         }
 
         {
