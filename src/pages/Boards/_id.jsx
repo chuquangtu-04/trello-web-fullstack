@@ -4,6 +4,8 @@ import BoardBar from '../BoardBar/BoardBar'
 import BoardContent from '../BoardContent/BoardContent'
 import { mapOrder } from '~/utils/sorts'
 import CircularProgress from '@mui/material/CircularProgress'
+import { toast } from 'react-toastify'
+
 
 // import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
@@ -172,7 +174,8 @@ function Board() {
     if (columnData.cardOrderIds.includes(`${columnData._id}-placeholder-card`)) {
       columnData.cardOrderIds = []
     }
-    deleteColumnAPI({ columnId: columnData._id })
+    deleteColumnAPI({ columnId: columnData._id }).then((res) => {
+      toast.success(res.message)})
   }
 
   if (!board) {
