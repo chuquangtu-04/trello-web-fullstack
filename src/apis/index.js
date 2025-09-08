@@ -5,10 +5,16 @@ export const fetchBoardDetailsAPI = async (id) => {
   return res.data
 }
 
+export const fetchBoardDetailsSoftColumnAPI = async (id) => {
+  const res = await get(`boards/boards-soft-column/${id}`)
+  return res.data
+}
+
 export const updateBoardDetailsAPI = async (boardId, newCardData) => {
   const res = await put(`boards/${boardId}`, newCardData)
   return res.data
 }
+
 // Column
 export const createNewColumnAPI = async (newColumnData) => {
   const res = await post('columns', newColumnData)
@@ -19,6 +25,12 @@ export const deleteColumnAPI = async (deleteColumnData) => {
   const res = await patch('columns/soft-delete', deleteColumnData)
   return res.data
 }
+// Khôi phục Column
+export const restoreColumnsAPI = async (columnId) => {
+  const res = await patch(`columns/restore-columns/${columnId}`, { _destroy: false })
+  return res.data
+}
+
 
 // Card
 export const createNewCardAPI = async (newCardData) => {

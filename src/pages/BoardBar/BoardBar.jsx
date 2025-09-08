@@ -2,7 +2,6 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import VpnLockIcon from '@mui/icons-material/VpnLock'
-import AddToDriveIcon from '@mui/icons-material/AddToDrive'
 import BoltIcon from '@mui/icons-material/Bolt'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import Avatar from '@mui/material/Avatar'
@@ -11,6 +10,7 @@ import { Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatters'
+import Archive from './Archive'
 const MENU_STYLE = {
   color: 'primary.main',
   backgroundColor: 'white',
@@ -22,8 +22,7 @@ const MENU_STYLE = {
   },
   '&:hover': {
     backgroundColor: 'primary.50'
-  }
-}
+  } }
 function BoardBar({ board }) {
   return (
     <Box sx={{
@@ -63,12 +62,6 @@ function BoardBar({ board }) {
         </Tooltip>
         <Chip
           sx={MENU_STYLE}
-          icon={<AddToDriveIcon />}
-          label="Add To Google Drive"
-          onClick={() => {}}
-        />
-        <Chip
-          sx={MENU_STYLE}
           icon={<BoltIcon />}
           label="Automatic"
           onClick={() => {}}
@@ -79,6 +72,7 @@ function BoardBar({ board }) {
           label="Filters"
           onClick={() => {}}
         />
+        <Archive/>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
