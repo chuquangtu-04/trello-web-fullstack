@@ -11,8 +11,9 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '@mui/material'
 import { cloneDeep } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailsSoftColumnAPI, restoreColumnsAPI } from '~/apis'
+import { fetchBoardDetailsSoftColumnAPI, restoreColumnsAPI, hardDeleteColumnAPI } from '~/apis'
 import { toast } from 'react-toastify'
+import { useConfirm } from 'material-ui-confirm'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -52,6 +53,7 @@ function Archive() {
   }
   // Khôi phục column
   const handleArchiveColumn = (columnId) => {
+    // Cập nhật lại state cho chuẩn dữ liệu
     const newColumns = cloneDeep(columnArchive)
     const newColumnsDelete = newColumns.filter(column => column._id != columnId)
     setColumnArchive(newColumnsDelete)
@@ -63,7 +65,34 @@ function Archive() {
   }
 
   // Xóa vĩnh viên column
+  const confirmDeleteColumn = useConfirm()
   const handleDeleteColumn = (columnId) => {
+    confirmDeleteColumn({
+      title: 'Delete Column',
+      description: 'This action will delete the Column and Tag permanently you cannot restore it !',
+      confirmationText: 'Agree',
+      cancellationText: 'Cancel'
+    })
+      .then(() => {
+      // Cập nhật lại state cho chuẩn dữ liệu
+        const newColumns = cloneDeep(columnArchive)
+        const newColumnsDelete = newColumns.filter(column => column._id != columnId)
+        setColumnArchive(newColumnsDelete)
+        //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
+        // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
+        //   đưa dữ liệu Board ra ngoài Redux Global Store,
+        // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
+        //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
+        // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
+
+        // Gọi API
+        hardDeleteColumnAPI(columnId).then((res) => {
+          toast.success(res.message)
+        })
+      })
+      .catch(
+        () => {}
+      )
   }
 
   if (!columnArchive) {

@@ -31,3 +31,9 @@ export const patch = async (path, option= {}) => {
   const response = await request.patch(path, option)
   return response
 }
+
+// Method delete
+export const deleted = async (path) => {
+  const response = await request.delete(path)
+  return response
+}
