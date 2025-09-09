@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { generatePlaceholderCard } from '~/utils/formatters'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCarts/Cards/Card'
-import ListColumns from './ListColumns/listColumns'
+import ListColumns from './ListColumns/ListColumns'
 import { CustomMouseSensor, CustomTouchSensor } from '~/CustomLibraries/customSensors'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
