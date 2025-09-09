@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { useState } from 'react'
-import Column from './Column/column'
+import Column from './Column/Column'
 import { toast } from 'react-toastify'
 
 
