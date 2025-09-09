@@ -1,4 +1,4 @@
-import { get, post, put, patch } from '~/utils/httpRequest'
+import { get, post, put, patch, deleted } from '~/utils/httpRequest'
 // Board
 export const fetchBoardDetailsAPI = async (id) => {
   const res = await get(`boards/${id}`)
@@ -28,6 +28,12 @@ export const deleteColumnAPI = async (deleteColumnData) => {
 // Khôi phục Column
 export const restoreColumnsAPI = async (columnId) => {
   const res = await patch(`columns/restore-columns/${columnId}`, { _destroy: false })
+  return res.data
+}
+
+// Xóa Vĩnh viễn Column và Card trong Column
+export const hardDeleteColumnAPI = async (columnId) => {
+  const res = await deleted(`columns/hard-delete/${columnId}`)
   return res.data
 }
 
