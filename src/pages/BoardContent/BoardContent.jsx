@@ -28,12 +28,9 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 
 function BoardContent({
   board,
-  createNewColumn,
-  createNewCard,
   moveColumn,
   moveCardInColumn,
-  moveCardOutColumn,
-  deleteColumn
+  moveCardOutColumn
 }) {
 
 
@@ -340,9 +337,6 @@ function BoardContent({
         p: '10px 0'
       }}>
         <ListColumns
-          createNewColumn={createNewColumn}
-          createNewCard={createNewCard}
-          deleteColumn= {deleteColumn}
           columns={orderedColumnState}/>
         <DragOverlay dropAnimation={customerDropAnimation}>
           {activeDragItemType && null}
