@@ -1,9 +1,10 @@
 import { get, post, put, patch, deleted } from '~/utils/httpRequest'
 // Board
-export const fetchBoardDetailsAPI = async (id) => {
-  const res = await get(`boards/${id}`)
-  return res.data
-}
+// Đã move vào redux
+// export const fetchBoardDetailsAPI = async (id) => {
+//   const res = await get(`boards/${id}`)
+//   return res.data
+// }
 
 export const fetchBoardDetailsSoftColumnAPI = async (id) => {
   const res = await get(`boards/boards-soft-column/${id}`)

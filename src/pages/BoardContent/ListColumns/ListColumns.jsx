@@ -5,11 +5,17 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { useState } from 'react'
-import Column from './Column/Column'
 import { toast } from 'react-toastify'
+import { createNewColumnAPI } from '~/apis'
+import Column from './Column/Column'
+import { cloneDeep } from 'lodash'
+import { useDispatch, useSelector } from 'react-redux'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 
-
-function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) {
+function ListColumns({ columns }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
   const [openNewColumnFrom, setOpenNewColumnFrom] = useState(false)
   const toggleOpenNewColumnFrom = () => setOpenNewColumnFrom(!openNewColumnFrom)
   const [newColumnTitle, setNewColumnTitle] = useState('')
@@ -23,13 +29,34 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) 
     const newColumnData = {
       title: newColumnTitle
     }
-    //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
-    // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
-    //   đưa dữ liệu Board ra ngoài Redux Global Store,
-    // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
-    //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
-    // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
-    await createNewColumn(newColumnData)
+    // Gọi Api tạo mới column và làm lại dữ liệu State Board
+    const createNewColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id
+    })
+    createNewColumn.cards = [generatePlaceholderCard(createNewColumn)],
+    createNewColumn.cardOrderIds = [generatePlaceholderCard(createNewColumn)._id]
+
+    //  * Đoạn này sẽ dính lỗi object is not extensible bởi dù đã copy/clone ra giá trị newBoard nhưng bản chất
+    //  * của spread operator là Shallow Copy/Clone, nên dính phải rules Immutability trong Redux Toolkit không
+    //  * dùng được hàm PUSH (sửa giá trị mảng trực tiếp), cách đơn giản nhanh gọn nhất ở trường hợp này của chúng
+    //  * ta là dùng tới Deep Copy/Clone toàn bộ cái Board cho dễ hiểu và code ngắn gọn.
+    //  * https://redux-toolkit.js.org/usage/immer-reducers
+    //  * Tài liệu thêm về Shallow và Deep Copy Object trong JS:
+    //  * https://www.javascripttutorial.net/object/3-ways-to-copy-objects-in-javascript/
+
+    // Cập nhật lại board
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createNewColumn)
+    newBoard.columnOrderIds.push(createNewColumn._id)
+    //  * Ngoài ra cách nữa là vẫn có thể dùng array.concat thay cho push như docs của Redux Toolkit ở trên vì
+    //  * push như đã nói nó sẽ thay đổi giá trị mảng trực tiếp, còn concat thì nó merge – ghép mảng lại và
+    //  * tạo ra một mảng mới để chúng ta gán lại giá trị nên không vấn đề gì.
+    // const newBoard = { ...board }
+    // newBoard.columns = newBoard.columns.concat([createNewColumn])
+    // newBoard.columnOrderIds = newBoard.columnOrderIds.concat([createNewColumn._id])
+    // setBoard(newBoard)
+    dispatch(updateCurrentActiveBoard(newBoard))
     setNewColumnTitle('')
     toggleOpenNewColumnFrom()
   }
@@ -45,7 +72,7 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) 
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
         {
-          columns.map(column => (<Column key={column._id} column={column} createNewCard={createNewCard} deleteColumn={deleteColumn}/>))
+          columns.map(column => (<Column key={column._id} column={column}/>))
         }
 
         {

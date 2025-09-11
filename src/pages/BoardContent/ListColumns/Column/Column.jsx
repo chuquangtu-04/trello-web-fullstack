@@ -18,13 +18,19 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
-import { useState } from 'react'
-import { toast } from 'react-toastify'
-import ListCards from './ListCarts/ListCards'
+import { cloneDeep } from 'lodash'
 import { useConfirm } from 'material-ui-confirm'
+import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import { createNewCardAPI, deleteColumnAPI } from '~/apis'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import ListCards from './ListCarts/ListCards'
 
 
-function Column({ column, createNewCard, deleteColumn }) {
+function Column({ column }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
   const [openNewCardFrom, setOpenNewCardFrom] = useState(false)
   const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
   const [newCardTitle, setNewCardTitle] = useState('')
@@ -61,17 +67,31 @@ function Column({ column, createNewCard, deleteColumn }) {
       toast.error('Please enter Card title', { position: 'bottom-right' })
       return
     }
-    const newCaredData = {
+    const createNewCard = {
       title: newCardTitle,
       columnId: column._id
     }
-    //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
-    // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
-    //   đưa dữ liệu Board ra ngoài Redux Global Store,
-    // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
-    //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
-    // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
-    await createNewCard(newCaredData)
+    const createdNewCard = await createNewCardAPI({ ...createNewCard, boardId: board._id })
+    // Tương tự hàm createColumn
+    const newBoard = cloneDeep(board)
+    newBoard.columns.forEach(column => {
+      if (column._id === createdNewCard.columnId) {
+        if (column.cards.some(card => card.FE_placeholderCard)) {
+          column.cards = [createdNewCard]
+          column.cardOrderIds = [createdNewCard._id]
+        } else {
+          column.cards.push(createdNewCard)
+          column.cardOrderIds.push(createdNewCard._id)
+        }
+      }
+    })
+    // const columnToUpdate = newBoard.columns.find(column => column._id === createNewCard.columnId)
+    // if (columnToUpdate) {
+    //   columnToUpdate.cards.push(createdNewCard)
+    //   columnToUpdate.cardOrderIds.push(createNewCard._id)
+    // }
+    // setBoard(newBoard)
+    dispatch(updateCurrentActiveBoard(newBoard))
     setNewCardTitle('')
     toggleOpenNewCardFrom()
   }
@@ -86,13 +106,18 @@ function Column({ column, createNewCard, deleteColumn }) {
       cancellationText: 'Cancel'
     })
       .then(() => {
-        //   * Gọi lên props function createNewColumn nằm ở component cha cao nhất (boards/_id.jsx)
-        // * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
-        //   đưa dữ liệu Board ra ngoài Redux Global Store,
-        // * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
-        //   component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
-        // * – Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
-        deleteColumn(column)
+        // Update Lại dự liệu cho chuẩn state board
+        const columnData = column
+        const newBoard = cloneDeep(board)
+
+        if (!columnData) return
+        newBoard.columns = newBoard.columns.filter(c => c._id != columnData._id)
+        newBoard.columnOrderIds = newBoard.columnOrderIds.filter(c => c != columnData._id)
+        // setBoard(newBoard)
+        dispatch(updateCurrentActiveBoard(newBoard))
+
+        deleteColumnAPI({ columnId: columnData._id }).then((res) => {
+          toast.success(res.message)})
       })
       .catch(
         () => {}
