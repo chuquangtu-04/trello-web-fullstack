@@ -24,6 +24,7 @@ function Board() {
   // const [board, setBoard] = useState(null)
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
+
   useEffect(() => {
     const boardId = '68b177305ae24b6d3851be0d'
     // Call Api
