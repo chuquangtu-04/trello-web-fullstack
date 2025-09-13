@@ -9,11 +9,14 @@ import Menu from '@mui/material/Menu'
 import TextField from '@mui/material/TextField'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '@mui/material'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailsSoftColumnAPI, restoreColumnsAPI, hardDeleteColumnAPI } from '~/apis'
+import { restoreColumnsAPI, hardDeleteColumnAPI } from '~/apis'
 import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { fetchBoardDetailsSoftColumnAPI } from '~/apis'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -30,19 +33,34 @@ const MENU_STYLE = {
   '& .MuiChip-icon': { ml: '18px' }
 }
 function Archive() {
-  const [columnArchive, setColumnArchive] = useState([])
+  const dispatch = useDispatch()
+  // Lấy board trong redux
+  const boardFromRedux = useSelector(selectCurrentActiveBoard)
 
+  const [columnArchive, setColumnArchive] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
   const [showArchive, setShowArchive] = useState(false)
   const toggleOpenShowArchive = () => (setShowArchive(!showArchive))
 
-  const boardId = '68b177305ae24b6d3851be0d'
+  // Gọi API lấy những column bị xóa mềm
   useEffect( () => {
     ( async () => {
-      const board = await fetchBoardDetailsSoftColumnAPI(boardId)
+      const board = await fetchBoardDetailsSoftColumnAPI(boardFromRedux._id)
       setColumnArchive(board.columns)
     })()
-  }, [])
+  }, [boardFromRedux])
+
+  // Backup trước khi lưu dữ liệu mới vào localStorage
+  useEffect(() => {
+    if (!boardFromRedux) return
+
+    const oldBoard = localStorage.getItem('board')
+    if (oldBoard) {
+      localStorage.setItem('oldBoard', oldBoard)
+    }
+    localStorage.setItem('board', JSON.stringify(boardFromRedux))
+  }, [boardFromRedux])
+
 
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
@@ -52,14 +70,31 @@ function Archive() {
     setAnchorEl(null)
   }
   // Khôi phục column
-  const handleArchiveColumn = (columnId) => {
+  const handleArchiveColumn = (column) => {
     // Cập nhật lại state cho chuẩn dữ liệu
     const newColumns = cloneDeep(columnArchive)
-    const newColumnsDelete = newColumns.filter(column => column._id != columnId)
+    const newColumnsDelete = newColumns.filter(column => column._id != column._id)
     setColumnArchive(newColumnsDelete)
 
+    const oldBoard = JSON.parse(localStorage.getItem('oldBoard'))
+
+
+    // Lấy ra vị trí column đã bị xóa trong board
+    const oldColumnIndex = oldBoard.columns.findIndex(col => col._id === column._id)
+
+    const newBoard = cloneDeep(boardFromRedux)
+    if (isEmpty(column.cardOrderIds)) {
+      column.cardOrderIds = [`${column._id}-placeholder-card`],
+      column.cards = [{ _id: `${column._id}-placeholder-card`, boardFromRedux: boardFromRedux._id, columnId: column._id, FE_placeholderCard:true }]
+    }
+
+    // Thực hiện khôi phục column bị xóa về đúng vị trí trước khi bị xóa 
+    // Nếu sử dụng push ở đây nó sẽ mặc định khôi phục column về cuối hàng
+    newBoard.columns.splice(oldColumnIndex, 0, column)
+
+    dispatch(updateCurrentActiveBoard(newBoard))
     // Gọi API
-    restoreColumnsAPI(columnId).then((res) => {
+    restoreColumnsAPI(column._id).then((res) => {
       toast.success(res.message)
     })
   }
@@ -187,7 +222,7 @@ function Archive() {
                           {column.title}
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Button
-                              onClick={() => handleArchiveColumn(column._id)}
+                              onClick={() => handleArchiveColumn(column)}
                               startIcon={<RestartAltIcon/>}
                               sx={{ mr: '6px' }}
                               variant="contained"
