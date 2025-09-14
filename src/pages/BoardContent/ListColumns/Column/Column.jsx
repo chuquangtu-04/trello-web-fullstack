@@ -292,7 +292,10 @@ function Column({ column }) {
                   alignItems: 'center',
                   gap: 2
                 }}>
-                  <Button variant='contained' size='small'
+                  <Button
+                    className='interceptor-loading'
+                    variant='contained'
+                    size='small'
                     onClick={addNewCard}
                   >Add</Button>
                   <CloseIcon onClick={toggleOpenNewCardFrom}

@@ -42,19 +42,19 @@ function LoginForm() {
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', color: theme => theme.palette.grey[500] }}>
             Author: Chu Quang Tus
           </Box>
-          <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
+          {/* <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
             <Alert severity="success" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
               Your email&nbsp;
               <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>chuquangtus2004@gmail.com</Typography>
               &nbsp;has been verified.<br />
-              {/* Now you can login to enjoy our services! Have a good day! */}
+              Now you can login to enjoy our services! Have a good day!
             </Alert>
             <Alert severity="info" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
               An email has been sent to&nbsp;
               <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>chuquangtu2004@gmail.com</Typography>
               <br />Please check and verify your account before logging in!
             </Alert>
-          </Box>
+          </Box> */}
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>
               <TextField
@@ -96,6 +96,7 @@ function LoginForm() {
           </Box>
           <CardActions sx={{ padding: '0 1em 1em 1em' }}>
             <Button
+              className='interceptor-loading'
               type="submit"
               variant="contained"
               color="primary"

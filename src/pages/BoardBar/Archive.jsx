@@ -45,7 +45,9 @@ function Archive() {
   // Gọi API lấy những column bị xóa mềm
   useEffect( () => {
     ( async () => {
+      console.log('hello')
       const board = await fetchBoardDetailsSoftColumnAPI(boardFromRedux._id)
+      console.log('🚀 ~ Archive ~ board:', board)
       setColumnArchive(board.columns)
     })()
   }, [boardFromRedux])
