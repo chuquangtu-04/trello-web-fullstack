@@ -143,7 +143,10 @@ function ListColumns({ columns }) {
                 alignItems: 'center',
                 gap: 2
               }}>
-                <Button variant='contained' size='small'
+                <Button
+                  className='interceptor-loading'
+                  variant='contained'
+                  size='small'
                   onClick={addNewColumn}
                 >Add Column</Button>
                 <CloseIcon onClick={toggleOpenNewColumnFrom}
