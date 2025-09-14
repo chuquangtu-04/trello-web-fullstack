@@ -18,6 +18,7 @@ import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
+import { useParams } from 'react-router-dom'
 
 function Board() {
   // Không dùng State của component nữa mà chuyển qua dùng State của Redux
@@ -25,11 +26,12 @@ function Board() {
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
 
+  // Lấy boardId thông qua useParams() trên url
+  const { boardId } = useParams()
   useEffect(() => {
-    const boardId = '68b177305ae24b6d3851be0d'
     // Call Api
     dispatch(fetchBoardDetailsAPI(boardId))
-  }, [dispatch])
+  }, [dispatch, boardId])
 
   // Cập nhật state board
   // Phía Front-end chúng ta phải tự làm đúng lại state data board (thay vì phải gọi lại api fetchBoardDetailsAPI)
