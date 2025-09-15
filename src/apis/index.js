@@ -1,4 +1,5 @@
 import { get, post, put, patch, deleted } from '~/utils/httpRequest'
+import { toast } from 'react-toastify'
 // Board
 // Đã move vào redux
 // export const fetchBoardDetailsAPI = async (id) => {
@@ -51,4 +52,29 @@ export const updateCardInColumnAPI = async (columnId, newColumnData) => {
 export const updateCardOutColumnAPI = async (newColumnData) => {
   const res = await put('columns/moving_card', newColumnData)
   return res.data
+}
+
+/** Users */
+export const registerUserAPI = async (data) => {
+  const response = await post(
+    'users/register',
+    data
+  )
+  toast.success(
+    'Account created successfully! Please check and verify your account before logging in!',
+    { theme: 'colored' }
+  )
+  return response.data
+}
+
+export const verifyUserAPI = async (data) => {
+  const response = await put(
+    'users/verify',
+    data
+  )
+  toast.success(
+    'Account verified successfully! Now you can login to enjoy our services! Have a good day!',
+    { theme: 'colored' }
+  )
+  return response.data
 }
