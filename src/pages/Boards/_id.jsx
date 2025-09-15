@@ -1,13 +1,13 @@
-import CircularProgress from '@mui/material/CircularProgress'
 import Container from '@mui/material/Container'
 import AppBar from '~/components/AppBar/AppBar'
+import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 import BoardBar from '../BoardBar/BoardBar'
 import BoardContent from '../BoardContent/BoardContent'
 
-import { Box, Typography } from '@mui/material'
 import { cloneDeep } from 'lodash'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
 import {
   updateBoardDetailsAPI,
   updateCardInColumnAPI,
@@ -18,7 +18,6 @@ import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
-import { useParams } from 'react-router-dom'
 
 function Board() {
   // Không dùng State của component nữa mà chuyển qua dùng State của Redux
@@ -123,16 +122,7 @@ function Board() {
 
   if (!board) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        gap: 2
-      }}>
-        <CircularProgress />
-        <Typography>Loading board...</Typography>
-      </Box>
+      <PageLoadingSpinner caption='Loading Board...'/>
     )
   }
 

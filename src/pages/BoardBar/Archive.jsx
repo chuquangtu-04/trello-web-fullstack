@@ -45,9 +45,7 @@ function Archive() {
   // Gọi API lấy những column bị xóa mềm
   useEffect( () => {
     ( async () => {
-      console.log('hello')
       const board = await fetchBoardDetailsSoftColumnAPI(boardFromRedux._id)
-      console.log('🚀 ~ Archive ~ board:', board)
       setColumnArchive(board.columns)
     })()
   }, [boardFromRedux])
@@ -75,7 +73,7 @@ function Archive() {
   const handleArchiveColumn = (column) => {
     // Cập nhật lại state cho chuẩn dữ liệu
     const newColumns = cloneDeep(columnArchive)
-    const newColumnsDelete = newColumns.filter(column => column._id != column._id)
+    const newColumnsDelete = newColumns.filter(columnId => columnId._id != column._id)
     setColumnArchive(newColumnsDelete)
 
     const oldBoard = JSON.parse(localStorage.getItem('oldBoard'))
@@ -131,22 +129,6 @@ function Archive() {
         () => {}
       )
   }
-
-  if (!columnArchive) {
-    return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        gap: 2
-      }}>
-        <CircularProgress />
-        <Typography>Loading board...</Typography>
-      </Box>
-    )
-  }
-
   return (
     <Box>
       <Button
