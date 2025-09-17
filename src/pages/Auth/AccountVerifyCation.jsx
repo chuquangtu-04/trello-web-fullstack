@@ -17,7 +17,7 @@ function AccountVerifyCation() {
   // Gọi API để verify tài khoản
   useEffect(() => {
     if (email && token ) {
-      verifyUserAPI().then(() => {
+      verifyUserAPI({ email, token }).then(() => {
         // Nếu như gọi API verify account thành công thì gán biến verified = true
         setVerified(true)
       })
