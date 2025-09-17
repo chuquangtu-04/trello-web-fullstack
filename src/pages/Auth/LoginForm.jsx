@@ -1,40 +1,54 @@
-import { Link } from 'react-router-dom'
+import LockIcon from '@mui/icons-material/Lock'
+import { Card as MuiCard } from '@mui/material'
+import Alert from '@mui/material/Alert'
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Avatar from '@mui/material/Avatar'
-import LockIcon from '@mui/icons-material/Lock'
-import Typography from '@mui/material/Typography'
-import { Card as MuiCard } from '@mui/material'
-import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
 import CardActions from '@mui/material/CardActions'
 import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import Zoom from '@mui/material/Zoom'
-import Alert from '@mui/material/Alert'
 import { useForm } from 'react-hook-form'
-import { useSearchParams } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
+import { loginUserAPI } from '~/redux/user/userSlice'
 
+import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import {
   EMAIL_RULE,
-  PASSWORD_RULE,
+  EMAIL_RULE_MESSAGE,
   FIELD_REQUIRED_MESSAGE,
-  PASSWORD_RULE_MESSAGE,
-  EMAIL_RULE_MESSAGE
+  PASSWORD_RULE,
+  PASSWORD_RULE_MESSAGE
 } from '~/utils/validators'
-import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 
 function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   let [searchParams] = useSearchParams()
+
   const registeredEmail = searchParams.get('registeredEmail')
   const verifiedEmail = searchParams.get('verifiedEmail')
 
 
   const submitLogIn = (data) => {
+    const { email, password } = data
+    toast.promise(
+      dispatch(loginUserAPI({ email, password })),
+      { pending: 'Are logged in...' }
+    )
+      .then(res => {
+        // Đoạn này phải kiểm tra không có lỗi thì mới redirect về router
+        if (!res.error) navigate('/')
+      })
   }
   return (
     <form onSubmit={handleSubmit(submitLogIn)}>
-      <Zoom in={true} style={{ transitionDelay: '200ms'}}>
+      <Zoom in={true} style={{ transitionDelay: '200ms' }}>
         <MuiCard sx={{ minWidth: 380, maxWidth: 380, marginTop: '1em', marginBottom: '1em' }}>
           <Box sx={{
             margin: '1em',
