@@ -78,3 +78,8 @@ export const verifyUserAPI = async (data) => {
   )
   return response.data
 }
+export const refreshTokenAPI = async () => {
+  const response = await get('users/refresh_token')
+  return response.data
+}
+
