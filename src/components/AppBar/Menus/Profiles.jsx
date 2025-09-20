@@ -10,6 +10,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useState } from 'react'
 import IconButton from '@mui/material/IconButton'
+import { Link } from 'react-router-dom'
 
 import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentUser, logoutUserAPI } from '~/redux/user/userSlice'
@@ -62,14 +63,15 @@ function Profiles() {
         onClose={handleClose}
         onClick={handleClose}
       >
-        <MenuItem sx={{
-          '&:hover': { color: 'success.light' }
-        }}>
-          <Avatar
-            sx={{ width: 34, height: 34, mr: 2 }}
-            src={currentUser?.avatar}
-          /> Profile
-        </MenuItem>
+        <Link to='/settings/account' style={{ color: 'inherit' }}>
+          <MenuItem sx={{ '&:hover': { color: 'success.light' } }}>
+            <Avatar
+              sx={{ width: 34, height: 34, mr: 2 }}
+              src={currentUser?.avatar}
+            /> Profile
+          </MenuItem>
+        </Link>
+
         <Divider />
         <MenuItem>
           <ListItemIcon>
