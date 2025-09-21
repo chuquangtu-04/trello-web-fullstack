@@ -17,6 +17,8 @@ import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { updateUserAPI } from '~/redux/user/userSlice'
 
 // Xử lý custom đẹp cái input file ở đây: https://mui.com/material-ui/react-button/#file-upload
 // Ngoài ra note thêm lib này từ docs của MUI nó recommend nếu cần dùng: https://github.com/viclafouch/mui-file-input
@@ -33,6 +35,7 @@ const VisuallyHiddenInput = styled('input')({
 })
 
 function AccountTab() {
+  const dispatch = useDispatch()
   const currentUser = useSelector(selectCurrentUser)
 
   // Những thông tin của user để init vào form (key tương ứng với register phía dưới Field)
@@ -46,12 +49,19 @@ function AccountTab() {
 
   const submitChangeGeneralInformation = (data) => {
     const { displayName } = data
-    console.log('displayName: ', displayName)
 
     // Nếu không có sự thay đổi gì về displayname thì không làm gì cả
     if (displayName === currentUser?.displayName) return
-
-    // Gọi API...
+    toast.promise(
+      dispatch(updateUserAPI({ displayName })),
+      { pending: 'Updating...' }
+    )
+      .then(res => {
+        // Đoạn này nếu không có lỗi (update thành công) thì mới thực hiện các hành động cần thiết
+        if (!res.error) {
+          toast.success('User updated successfully!')
+        }
+      })
   }
 
   const uploadAvatar = (e) => {
