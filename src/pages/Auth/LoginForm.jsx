@@ -43,7 +43,7 @@ function LoginForm() {
     )
       .then(res => {
         // Đoạn này phải kiểm tra không có lỗi thì mới redirect về router
-        if (!res.error) navigate('/')
+        if (!res.error) navigate('/boards')
       })
   }
   return (
