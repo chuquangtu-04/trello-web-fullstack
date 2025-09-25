@@ -16,6 +16,11 @@ export const updateBoardDetailsAPI = async (boardId, newCardData) => {
   const res = await put(`boards/${boardId}`, newCardData)
   return res.data
 }
+// lấy ra một list board thuộc về user đang đăng nhập
+export const fetchBoardsAPI = async (searchPath) => {
+  const res = await get(`boards/${searchPath}`)
+  return res.data
+}
 
 // Column
 export const createNewColumnAPI = async (newColumnData) => {
@@ -82,4 +87,5 @@ export const refreshTokenAPI = async () => {
   const response = await get('users/refresh_token')
   return response.data
 }
+
 

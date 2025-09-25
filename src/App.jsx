@@ -31,7 +31,7 @@ function App() {
         // trong history của Browser
         // Thực hành dễ hiểu hơn bằng cách nhấn Go Home từ trang 404 xong thử quay lại bằng nút back của trình
         // duyệt giữa 2 trường hợp có replace hoặc không có.
-        <Navigate to='/boards/68b177305ae24b6d3851be0d' replace={true} />
+        <Navigate to='/boards' replace={true} />
       }/>
 
       {/* Protected Routes (Hiểu đơn giản trong dự án của chúng ta là những route chỉ cho truy cập sau khi đã login) */}
