@@ -57,12 +57,16 @@ function Boards() {
    * https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/URLSearchParams
    */
   const query = new URLSearchParams(location.search)
-  console.log('🚀 ~ Boards ~ query:', query)
   /**
    * Lấy giá trị page từ query, default sẽ là 1 nếu không tồn tại page từ url.
    * Nhắc lại kiến thức cơ bản hàm parseInt cần tham số thứ 2 là Hệ thập phân (hệ đếm cơ số 10) để đảm bảo chuẩn số cho phân trang
    */
   const page = parseInt(query.get('page') || '1', 10)
+
+  const updateStateData = (res) => {
+    setBoards(res.boards || [])
+    setTotalBoards(res.totalBoards || 0)
+  }
 
   useEffect(() => {
     // Fake tạm 16 cái item thay cho boards
@@ -78,12 +82,13 @@ function Boards() {
 
     // Gọi API lấy danh sách boards ở đây...
     // ...
-    fetchBoardsAPI(location.search).then((res) => {
-      setBoards(res.boards || [])
-      setTotalBoards(res.totalBoards || 0)
-    })
+    fetchBoardsAPI(location.search).then(updateStateData)
   }, [location.search])
 
+  // Sau khi gọi Api tạo mới một board sẽ gợi lại Api fetchBoardsAPI()
+  const afterCreateNewBoard = () => {
+    fetchBoardsAPI(location.search).then(updateStateData)
+  }
   // Lúc chưa tồn tại boards > đang chờ gọi api thì hiện loading
   if (!boards) {
     return <PageLoadingSpinner caption="Loading Boards..." />
@@ -111,7 +116,7 @@ function Boards() {
             </Stack>
             <Divider sx={{ my: 1 }} />
             <Stack direction="column" spacing={1}>
-              <SidebarCreateBoardModal />
+              <SidebarCreateBoardModal afterCreateNewBoard={afterCreateNewBoard} />
             </Stack>
           </Grid>
 
