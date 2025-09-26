@@ -6,14 +6,19 @@ import { toast } from 'react-toastify'
 //   const res = await get(`boards/${id}`)
 //   return res.data
 // }
+export const createNewBoard = async (data) => {
+  const res = await post('/boards/', data)
+  toast.success('Create a new board successfully')
+  return res.data
+}
 
 export const fetchBoardDetailsSoftColumnAPI = async (id) => {
   const res = await get(`boards/boards-soft-column/${id}`)
   return res.data
 }
 
-export const updateBoardDetailsAPI = async (boardId, newCardData) => {
-  const res = await put(`boards/${boardId}`, newCardData)
+export const updateBoardDetailsAPI = async (boardId, data) => {
+  const res = await put(`boards/${boardId}`, data)
   return res.data
 }
 // lấy ra một list board thuộc về user đang đăng nhập
@@ -27,6 +32,12 @@ export const createNewColumnAPI = async (newColumnData) => {
   const res = await post('columns', newColumnData)
   return res.data
 }
+
+export const updateColumnDetailAPI = async (columnId, data) => {
+  const res = await put(`columns/${columnId}`, data)
+  return res.data
+}
+
 // Xóa mềm Column
 export const deleteColumnAPI = async (deleteColumnData) => {
   const res = await patch('columns/soft-delete', deleteColumnData)
