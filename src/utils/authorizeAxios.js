@@ -15,7 +15,6 @@ import { logoutUserAPI } from '~/redux/user/userSlice'
 let axiosReduxStore
 export const injectStore = mainStore => { axiosReduxStore = mainStore }
 
-
 // Khởi tạo một đối tượng Axios (authorizedAxiosInstance) mục đích để custom và cấu hình chung cho dự án.
 let authorizedAxiosInstance = axios.create({
   baseURL: `${API_ROOT}/v1/`,

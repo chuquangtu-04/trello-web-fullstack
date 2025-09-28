@@ -69,6 +69,10 @@ export const updateCardOutColumnAPI = async (newColumnData) => {
   const res = await put('columns/moving_card', newColumnData)
   return res.data
 }
+export const updateCardDetailAPI = async (cardId, data) => {
+  const res = await put(`cards/${cardId}`, data)
+  return res.data
+}
 
 /** Users */
 export const registerUserAPI = async (data) => {
