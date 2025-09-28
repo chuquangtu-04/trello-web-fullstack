@@ -11,6 +11,7 @@ import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatters'
 import Archive from './Archive'
+import BoardUserGroup from './BoardUserGroup'
 const MENU_STYLE = {
   color: 'primary.main',
   backgroundColor: 'white',
@@ -77,55 +78,8 @@ function BoardBar({ board }) {
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Button variant="outlined" startIcon={<PersonAddIcon/>}>Invite</Button>
-
-        <AvatarGroup max={6} sx={{
-          gap: 0.5,
-          '& .MuiAvatar-root': {
-            width: '36px',
-            height: '36px',
-            fontSize: '16px',
-            border: 'none',
-            cursor: 'pointer',
-            '&.MuiAvatar-colorDefault': { color: 'white', bgcolor: '#a4b0be' }
-          }
-        }}>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://5sfashion.vn/storage/upload/images/ckeditor/4KG2VgKFDJWqdtg4UMRqk5CnkJVoCpe5QMd20Pf7.jpg" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-05.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-06.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-07.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-12.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-14.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://5sfashion.vn/storage/upload/images/ckeditor/4KG2VgKFDJWqdtg4UMRqk5CnkJVoCpe5QMd20Pf7.jpg" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-05.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-06.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-07.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-12.webp" />
-          </Tooltip>
-          <Tooltip title='QuangTuDev'>
-            <Avatar alt="QuangTuDev" src="https://eric.edu.vn/upload/2025/01/em-gai-xinh-dep-14.webp" />
-          </Tooltip>
-        </AvatarGroup>
+        {/* Xử lý hiện thị danh sách thành viên của board */}
+        <BoardUserGroup/>
       </Box>
     </Box>
   )
