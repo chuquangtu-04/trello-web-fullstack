@@ -1,14 +1,12 @@
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import VpnLockIcon from '@mui/icons-material/VpnLock'
 import BoltIcon from '@mui/icons-material/Bolt'
+import DashboardIcon from '@mui/icons-material/Dashboard'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Avatar from '@mui/material/Avatar'
-import AvatarGroup from '@mui/material/AvatarGroup'
-import { Tooltip } from '@mui/material'
-import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import VpnLockIcon from '@mui/icons-material/VpnLock'
+import { Tooltip } from '@mui/material'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import { capitalizeFirstLetter } from '~/utils/formatters'
 import Archive from './Archive'
 import BoardUserGroup from './BoardUserGroup'
@@ -79,7 +77,7 @@ function BoardBar({ board }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Button variant="outlined" startIcon={<PersonAddIcon/>}>Invite</Button>
         {/* Xử lý hiện thị danh sách thành viên của board */}
-        <BoardUserGroup/>
+        <BoardUserGroup boardUsers={board?.FE_allUsers}/>
       </Box>
     </Box>
   )
