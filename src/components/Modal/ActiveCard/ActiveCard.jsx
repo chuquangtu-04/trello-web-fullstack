@@ -32,9 +32,9 @@ import CardUserGroup from './CardUserGroup'
 import CardDescriptionMdEditor from './CardDescriptionMdEditor'
 import CardActivitySection from './CardActivitySection'
 import { useDispatch } from 'react-redux'
-import { clearCurrentActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { clearAndHideCurrentActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { useSelector } from 'react-redux'
-import { selectCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { selectCurrentActiveCard, selectIsShowModalActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailAPI } from '~/apis'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 
@@ -66,11 +66,12 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 function ActiveCard() {
   const dispatch = useDispatch()
   const activeCard = useSelector(selectCurrentActiveCard)
+  const isShowModalActiveCard = useSelector(selectIsShowModalActiveCard)
   // Không dùng biến State để check đóng mở modal nữa vì chúng ta sẽ check bên board|_id.jsx
   // const [isOpen, setIsOpen] = useState(true)
   // const handleOpenModal = () => setIsOpen(true)
   const handleCloseModal = () => {
-    dispatch(clearCurrentActiveCard())
+    dispatch(clearAndHideCurrentActiveCard())
     // setIsOpen(false)
   }
 
@@ -110,11 +111,16 @@ function ActiveCard() {
       { pending: 'Updating...' }
     )
   }
+  // Dùng async await ở đây để component con CardActivitySection
+  //  chờ và nếu thành công thì mới clear thẻ input comment
+  const OnAddCardComment = async (newCommentToAdd) => {
+    await callApiUpdateCard({ newCommentToAdd })
+  }
 
   return (
     <Modal
       disableScrollLock
-      open={true}
+      open={isShowModalActiveCard}
       onClose={handleCloseModal} // Sử dụng onClose trong trường hợp muốn đóng Modal bằng nút ESC hoặc click ra ngoài Modal
       sx={{ overflowY: 'auto' }}>
       <Box sx={{
@@ -188,7 +194,10 @@ function ActiveCard() {
               </Box>
 
               {/* Feature 04: Xử lý các hành động, ví dụ comment vào Card */}
-              <CardActivitySection />
+              <CardActivitySection
+                cardComments={activeCard?.comments}
+                OnAddCardComment={OnAddCardComment}
+              />
             </Box>
           </Grid>
 

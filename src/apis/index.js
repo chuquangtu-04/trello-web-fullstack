@@ -27,6 +27,15 @@ export const fetchBoardsAPI = async (searchPath) => {
   return res.data
 }
 
+export const inviteUserToBoardAPI = async (data) => {
+  const res = await post('invitations/board', data)
+  toast.success(
+    'User invited to board successfully!',
+    { theme: 'colored' }
+  )
+  return res.data
+}
+
 // Column
 export const createNewColumnAPI = async (newColumnData) => {
   const res = await post('columns', newColumnData)

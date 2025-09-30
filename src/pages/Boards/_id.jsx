@@ -13,13 +13,12 @@ import {
   updateCardInColumnAPI,
   updateCardOutColumnAPI
 } from '~/apis'
+import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import {
   fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
-import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
-import { selectCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 
 
 function Board() {
@@ -27,7 +26,6 @@ function Board() {
   // const [board, setBoard] = useState(null)
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
-  const activeCard = useSelector(selectCurrentActiveCard)
 
   // Lấy boardId thông qua useParams() trên url
   const { boardId } = useParams()
@@ -132,8 +130,8 @@ function Board() {
 
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
-      {/* Modal Active Card, check đóng/mở dựa theo điều kiện có tồn tại data activeCard lưu trong Redux hay không thì mới render. Mỗi thời điểm chỉ tồn tại một cái Modal Card đang Active */}
-      { activeCard && <ActiveCard/> }
+      {/* Modal Active Card, check đóng/mở dựa theo isShowModalActiveCard lưu trong Redux hay không thì mới render. Mỗi thời điểm chỉ tồn tại một cái Modal Card đang Active */}
+      <ActiveCard/>
 
       {/* Các thành phần còn lại của boards details */}
       <AppBar/>
