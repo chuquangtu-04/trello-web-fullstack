@@ -1,27 +1,26 @@
-import ModeSelect from '~/components/ModeSelect/ModeSelect'
-import Box from '@mui/material/Box'
 import AppsIcon from '@mui/icons-material/Apps'
+import CloseIcon from '@mui/icons-material/Close'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
+import SearchIcon from '@mui/icons-material/Search'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import InputAdornment from '@mui/material/InputAdornment'
 import SvgIcon from '@mui/material/SvgIcon'
+import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ReactComponent as StarIcon } from '~/assets/trello.svg'
-import WorkSpaces from './Menus/WorkSpaces'
+import ModeSelect from '~/components/ModeSelect/ModeSelect'
+import Menu from './DrawerList/DrawerList'
+import Profiles from './Menus/Profiles'
 import Recent from './Menus/Recent'
 import Starred from './Menus/Starred'
 import Templates from './Menus/Templates'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Badge from '@mui/material/Badge'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
-import Tooltip from '@mui/material/Tooltip'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import Profiles from './Menus/Profiles'
-import Menu from './DrawerList/DrawerList'
-import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
-import InputAdornment from '@mui/material/InputAdornment'
-import SearchIcon from '@mui/icons-material/Search'
-import CloseIcon from '@mui/icons-material/Close'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import WorkSpaces from './Menus/WorkSpaces'
+import Notifications from './Notifications/Notifications'
 
 
 function AppBar() {
@@ -118,12 +117,10 @@ function AppBar() {
               }
             }
           }/>
+        {/* hiện thị dark light systems mode */}
         <ModeSelect/>
-        <Tooltip title="Notification">
-          <Badge color="warning" variant="dot" sx={{ cursor: 'pointer' }}>
-            <NotificationsNoneIcon sx={{ cursorL: 'pointer', color: 'white' }}/>
-          </Badge>
-        </Tooltip>
+        {/* Xử lý hiện thị các thông báo */}
+        <Notifications/>
 
         <Tooltip title="Help">
           <HelpOutlineIcon sx={{ cursor: 'pointer', color: 'white' }}/>
