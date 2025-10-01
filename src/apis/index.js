@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 //   return res.data
 // }
 export const createNewBoard = async (data) => {
-  const res = await post('/boards/', data)
+  const res = await post('boards/', data)
   toast.success('Create a new board successfully')
   return res.data
 }
