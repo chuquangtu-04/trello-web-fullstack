@@ -21,13 +21,21 @@ const persistor = persistStore(store)
 import { injectStore } from '~/utils/authorizeAxios'
 injectStore(store)
 
+// Cấu hình Socket.io phía client tại đây và export ra biến socketIoInstance
+// https://socket.io/how-to/use-with-react
+import { io } from 'socket.io-client'
+import { API_ROOT } from '~/utils/constants'
+
+export const socketIoInstance = io(API_ROOT)
+
+
 // Cấu hình react-router-dom với BrowserRouter
 import { BrowserRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename='/'>
-    <Provider store={store}>
-      <PersistGate persistor={persistor}>
+  <Provider store={store}>
+    <PersistGate persistor={persistor}>
+      <BrowserRouter basename='/'>
         <CssVarsProvider theme={theme}>
           {/* Reset toàn bộ các giá trị mặc định không nhất quán đó về một tiêu chuẩn chung. */}
           <ConfirmProvider defaultOptions={{
@@ -44,7 +52,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             />
           </ConfirmProvider>
         </CssVarsProvider>
-      </PersistGate>
-    </Provider>
-  </BrowserRouter>
+      </BrowserRouter>
+    </PersistGate>
+  </Provider>
 )
