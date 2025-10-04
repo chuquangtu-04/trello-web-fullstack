@@ -45,13 +45,13 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 function Boards() {
   // Số lượng bản ghi boards hiển thị tối đa trên 1 page tùy dự án (thường sẽ là 12 cái)
   const [boards, setBoards] = useState(null)
-  console.log('🚀 ~ Boards ~ boards:', boards)
+  // console.log('🚀 ~ Boards ~ boards:', boards)
   // Tổng toàn bộ số lượng bản ghi boards có trong Database mà phía BE trả về để FE dùng tính toán phân trang
   const [totalBoards, setTotalBoards] = useState(null)
 
   // Xử lý phân trang từ url với MUI: https://mui.com/material-ui/react-pagination/#router-integration
   const location = useLocation()
-  console.log('🚀 ~ Boards ~ location:', location)
+  // console.log('🚀 ~ Boards ~ location:', location)
   /**
    * Parse chuỗi string search trong location về đối tượng URLSearchParams trong JavaScript
    * https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/URLSearchParams
@@ -184,7 +184,7 @@ function Boards() {
                   renderItem={(item) => (
                     <PaginationItem
                       component={Link}
-                      to={`/boards${item.page === DEFAULT_PAGE ? '' : `?page=${item.page}`}`}
+                      to={`/boards${item.page === '' ? DEFAULT_PAGE : `?page=${item.page}`}`}
                       {...item}
                     />
                   )}
