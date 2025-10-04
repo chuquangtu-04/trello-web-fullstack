@@ -20,7 +20,7 @@ import { fetchInvitationsAPI,
   addNotification
 } from '~/redux/notifications/notificationsSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
-import { socketIoInstance } from '~/main'
+import { socketIoInstance } from '~/socketClient'
 import { useNavigate } from 'react-router-dom'
 const BOARD_INVITATION_STATUS = {
   PENDING: 'PENDING',
@@ -115,6 +115,7 @@ function Notifications() {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        disableEnforceFocus
         MenuListProps={{ 'aria-labelledby': 'basic-button-open-notification' }}
       >
         { (!notifications || notifications.length === 0) &&

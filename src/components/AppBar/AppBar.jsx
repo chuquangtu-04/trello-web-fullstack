@@ -1,13 +1,9 @@
 import AppsIcon from '@mui/icons-material/Apps'
-import CloseIcon from '@mui/icons-material/Close'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
-import SearchIcon from '@mui/icons-material/Search'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import InputAdornment from '@mui/material/InputAdornment'
 import SvgIcon from '@mui/material/SvgIcon'
-import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
@@ -21,10 +17,9 @@ import Starred from './Menus/Starred'
 import Templates from './Menus/Templates'
 import WorkSpaces from './Menus/WorkSpaces'
 import Notifications from './Notifications/Notifications'
-
+import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
 
 function AppBar() {
-  const [searchValue, setSearchValue] = useState('')
   return (
     <Box px={2} sx={{
       width: '100%',
@@ -69,55 +64,9 @@ function AppBar() {
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          spellCheck={false}
-          id="input-with-icon-textfield"
-          // id="outlined-search"
-          label="Search..."
-          type="text"
-          size='small'
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={
-                  {
-                    color: 'white'
-                  }
-                }/>
-              </InputAdornment>
-            ),
-            endAdornment: (
-              searchValue && (
-                <InputAdornment position="end">
-                  <CloseIcon onClick={() => setSearchValue('')} sx={
-                    {
-                      color: 'white',
-                      fontSize: 'medium',
-                      cursor: 'pointer'
-                    }
-                  }
-                  />
-                </InputAdornment>
-              )
-            )
-          }}
-          sx={
-            {
-              minWidth: '120px',
-              maxWidth: '180px',
-              '& label': { color: 'white' },
-              '& input': { color: 'white' },
-              '& label.Mui-focused': { color: 'white' },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'white' },
-                '&:hover fieldset': { borderColor: 'white' },
-                '&.Mui-focused fieldset': { borderColor: 'white' }
-              }
-            }
-          }/>
-        {/* hiện thị dark light systems mode */}
+        {/* Tìm kiếm nhanh 1 hoặc nhiều board */}
+        <AutoCompleteSearchBoard/>
+        {/* Hiện thị dark light systems mode */}
         <ModeSelect/>
         {/* Xử lý hiện thị các thông báo */}
         <Notifications/>
