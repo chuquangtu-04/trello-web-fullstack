@@ -49,18 +49,29 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit(submitLogIn)}>
       <Zoom in={true} style={{ transitionDelay: '200ms' }}>
-        <MuiCard sx={{ minWidth: 380, maxWidth: 380, marginTop: '1em', marginBottom: '1em' }}>
+        <MuiCard sx={
+          { minWidth: 380,
+            maxWidth: 380,
+            marginTop: '1em',
+            marginBottom: '1em'
+          }}>
           <Box sx={{
             margin: '1em',
             display: 'flex',
             justifyContent: 'center',
+            alignItems: 'center',
             gap: 1
           }}>
             <Avatar sx={{ bgcolor: 'primary.main' }}><LockIcon /></Avatar>
             <Avatar sx={{ bgcolor: 'primary.main' }}><TrelloIcon /></Avatar>
           </Box>
-          <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', color: theme => theme.palette.grey[500] }}>
-            Author: Chu Quang Tus
+          <Box sx={{ marginTop: '1em', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: theme => theme.palette.grey[500] }}>
+            <div>
+            email: orangematernity@gmail.com
+            </div>
+            <div>
+            password: 123456789a
+            </div>
           </Box>
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
 
