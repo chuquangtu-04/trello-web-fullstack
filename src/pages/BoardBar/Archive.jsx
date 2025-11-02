@@ -7,16 +7,13 @@ import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import TextField from '@mui/material/TextField'
-import CircularProgress from '@mui/material/CircularProgress'
-import { Typography } from '@mui/material'
 import { cloneDeep, isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
-import { restoreColumnsAPI, hardDeleteColumnAPI } from '~/apis'
-import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import { fetchBoardDetailsSoftColumnAPI, hardDeleteColumnAPI, restoreColumnsAPI } from '~/apis'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-import { fetchBoardDetailsSoftColumnAPI } from '~/apis'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -36,19 +33,23 @@ function Archive() {
   const dispatch = useDispatch()
   // Lấy board trong redux
   const boardFromRedux = useSelector(selectCurrentActiveBoard)
-
   const [columnArchive, setColumnArchive] = useState([])
-  const [anchorEl, setAnchorEl] = useState(null)
   const [showArchive, setShowArchive] = useState(false)
+
+  const [anchorEl, setAnchorEl] = useState(null)
   const toggleOpenShowArchive = () => (setShowArchive(!showArchive))
 
   // Gọi API lấy những column bị xóa mềm
+  // Feature trường hợp hiện thị ra colum xóa mềm
   useEffect( () => {
-    ( async () => {
+    if (!boardFromRedux?._id) return
+    const timeout = setTimeout(async () => {
       const board = await fetchBoardDetailsSoftColumnAPI(boardFromRedux._id)
       setColumnArchive(board.columns)
-    })()
-  }, [boardFromRedux])
+    }, 200) // đợi backend cập nhật xong
+
+    return () => clearTimeout(timeout)
+  }, [boardFromRedux.columns])
 
   // Backup trước khi lưu dữ liệu mới vào localStorage
   useEffect(() => {
@@ -88,7 +89,7 @@ function Archive() {
       column.cards = [{ _id: `${column._id}-placeholder-card`, boardFromRedux: boardFromRedux._id, columnId: column._id, FE_placeholderCard:true }]
     }
 
-    // Thực hiện khôi phục column bị xóa về đúng vị trí trước khi bị xóa 
+    // Thực hiện khôi phục column bị xóa về đúng vị trí trước khi bị xóa
     // Nếu sử dụng push ở đây nó sẽ mặc định khôi phục column về cuối hàng
     newBoard.columns.splice(oldColumnIndex, 0, column)
 
