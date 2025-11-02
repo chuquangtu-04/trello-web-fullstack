@@ -39,7 +39,6 @@ function Archive() {
   const [anchorEl, setAnchorEl] = useState(null)
   const toggleOpenShowArchive = () => (setShowArchive(!showArchive))
 
-
   // Gọi API lấy những column bị xóa mềm
   useEffect( () => {
     if (!boardFromRedux?._id) return
