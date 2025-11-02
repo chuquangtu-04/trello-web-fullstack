@@ -40,6 +40,7 @@ function Archive() {
   const toggleOpenShowArchive = () => (setShowArchive(!showArchive))
 
   // Gọi API lấy những column bị xóa mềm
+  // Feature trường hợp hiện thị ra colum xóa mềm
   useEffect( () => {
     if (!boardFromRedux?._id) return
     const timeout = setTimeout(async () => {
