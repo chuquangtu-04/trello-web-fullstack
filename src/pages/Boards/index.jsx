@@ -14,18 +14,16 @@ import HomeIcon from '@mui/icons-material/Home'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
-import { Link, useLocation, useParams } from 'react-router-dom'
-import randomColor from 'randomcolor'
+import { Link, useLocation } from 'react-router-dom'
 import SidebarCreateBoardModal from './create'
 import { fetchBoardsAPI } from '~/apis'
 
 import { styled } from '@mui/material/styles'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch } from 'react-redux'
+import { updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 // Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -137,27 +135,82 @@ function Boards() {
             {boards?.length > 0 &&
               <Grid container spacing={2}>
                 {boards.map(b =>
-                  <Grid xs={2} sm={3} md={4} key={b._id}>
-                    <Card sx={{ width: '250px' }}>
+                  <Grid
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    key={b._id}
+                    sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}
+                  >
+                    <Card
+                      sx={{
+                        width: 280,
+                        minWidth: 280,
+                        maxWidth: 280,
+                        height: 190,
+                        minHeight: 190,
+                        maxHeight: 190,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRadius: 2
+                      }}
+                    >
                       {/* Ý tưởng mở rộng về sau làm ảnh Cover cho board nhé */}
                       {/* <CardMedia component="img" height="100" image="https://picsum.photos/100" /> */}
-                      <Box sx={{ height: '50px', backgroundColor: randomColor() }}></Box>
+                      <Box
+                        sx={{
+                          height: 64,
+                          backgroundImage: b?.background ? `url(${b.background})` : 'none',
+                          backgroundPosition: 'center',
+                          backgroundSize: 'cover',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundColor: b?.background ? 'transparent' : 'primary.light'
+                        }}
+                      ></Box>
 
-                      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
-                        <Typography gutterBottom variant="h6" component="div">
+                      <CardContent
+                        sx={{
+                          p: 1.5,
+                          '&:last-child': { p: 1.5 },
+                          display: 'flex',
+                          flexDirection: 'column',
+                          flex: 1
+                        }}
+                      >
+                        <Typography
+                          gutterBottom
+                          variant="h6"
+                          component="div"
+                          sx={{
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            minHeight: 32,
+                            maxWidth: '100%'
+                          }}
+                        >
                           {b?.title}
                         </Typography>
                         <Typography
                           variant="body2"
                           color="text.secondary"
-                          sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            minHeight: 40
+                          }}
+                        >
                           {b?.description}
                         </Typography>
                         <Box
                           component={Link}
                           to={`/boards/${b._id}`}
                           sx={{
-                            mt: 1,
+                            mt: 'auto',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'flex-end',

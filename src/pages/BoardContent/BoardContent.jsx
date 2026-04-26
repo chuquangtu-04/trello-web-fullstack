@@ -331,7 +331,7 @@ function BoardContent({
       onDragEnd={handleDragEnd}
     >
       <Box sx={{
-        backgroundColor: (theme) => (theme.palette.mode === 'light' ? '#1976d2' : '#34495e'),
+        backgroundColor: 'transparent',
         width: '100%',
         height: (theme) => (theme.trello.boardContentHeight),
         p: '10px 0'

@@ -31,8 +31,9 @@ function BoardBar({ board }) {
       justifyContent: 'space-between',
       gap: 2,
       overflowX: 'auto',
-      backgroundColor: (theme) => (theme.palette.mode === 'light' ? 'white' : '#34495e'),
-      borderBottom: '1px solid white',
+      backgroundColor: (theme) => (theme.palette.mode === 'light' ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)'),
+      borderBottom: '1px solid rgba(255,255,255,0.28)',
+      backdropFilter: 'blur(2px)',
       paddingX: 2
     }}>
       <Box sx={
