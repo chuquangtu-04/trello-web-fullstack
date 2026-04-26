@@ -1,11 +1,12 @@
 import Container from '@mui/material/Container'
+import Box from '@mui/material/Box'
 import AppBar from '~/components/AppBar/AppBar'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 import BoardBar from '../BoardBar/BoardBar'
 import BoardContent from '../BoardContent/BoardContent'
 
 import { cloneDeep } from 'lodash'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import {
@@ -33,6 +34,21 @@ function Board() {
     // Call Api
     dispatch(fetchBoardDetailsAPI(boardId))
   }, [dispatch, boardId])
+
+  const boardBackgroundStyles = useMemo(() => {
+    if (!board?.background) {
+      return {
+        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1A2027' : '#dfe1e6'
+      }
+    }
+
+    return {
+      backgroundImage: `url(${board.background})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }
+  }, [board?.background])
 
   // Cập nhật state board
   // Phía Front-end chúng ta phải tự làm đúng lại state data board (thay vì phải gọi lại api fetchBoardDetailsAPI)
@@ -129,18 +145,37 @@ function Board() {
   }
 
   return (
-    <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
+    <Container
+      disableGutters
+      maxWidth={false}
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100vh',
+        ...boardBackgroundStyles
+      }}
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          bgcolor: 'rgba(0, 0, 0, 0.3)',
+          pointerEvents: 'none'
+        }}
+      />
+      <Box sx={{ position: 'relative', zIndex: 1, height: '100%' }}>
       {/* Modal Active Card, check đóng/mở dựa theo isShowModalActiveCard lưu trong Redux hay không thì mới render. Mỗi thời điểm chỉ tồn tại một cái Modal Card đang Active */}
-      <ActiveCard/>
+        <ActiveCard/>
 
-      {/* Các thành phần còn lại của boards details */}
-      <AppBar/>
-      <BoardBar board={board}/>
-      <BoardContent
-        moveColumn={moveColumn}
-        moveCardInColumn={moveCardInColumn}
-        moveCardOutColumn={moveCardOutColumn}
-        board={board}/>
+        {/* Các thành phần còn lại của boards details */}
+        <AppBar/>
+        <BoardBar board={board}/>
+        <BoardContent
+          moveColumn={moveColumn}
+          moveCardInColumn={moveCardInColumn}
+          moveCardOutColumn={moveCardOutColumn}
+          board={board}/>
+      </Box>
     </Container>
   )
 }

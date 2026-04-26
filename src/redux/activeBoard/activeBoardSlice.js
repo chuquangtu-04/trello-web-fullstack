@@ -7,7 +7,8 @@ import { generatePlaceholderCard } from '~/utils/formatters'
 
 // Khởi tạo giá trị State của một cái Slice trong redux
 const initialState = {
-  currentActiveBoard: null
+  currentActiveBoard: null,
+  boardCreationDraft: null
 }
 
 // Các hành động gọi api (bất đồng bộ) và cập nhật dữ liệu vào Redux, dùng Middleware createAsyncThunk đi kèm với extraReducers
@@ -61,6 +62,10 @@ export const activeBoardSlice = createSlice({
           })
         }
       }
+    },
+    setBoardCreationDraft: (state, action) => {
+      const payload = action.payload || {}
+      state.boardCreationDraft = { ...payload, FE_creationDraft: true }
     }
   },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
@@ -93,7 +98,7 @@ export const activeBoardSlice = createSlice({
 
 // Actions: Là nơi dành cho các components bên dưới gọi bằng dispatch() tới nó để cập nhật lại dữ liệu thông qua reducer (chạy đồng bộ)
 // Để ý ở trên thì không thấy properties actions đâu cả, bởi vì những cái actions này đơn giản là được thằng redux tạo tự động theo tên của reducer nhé.
-export const { updateCurrentActiveBoard, updateCardInBoard } = activeBoardSlice.actions
+export const { updateCurrentActiveBoard, updateCardInBoard, setBoardCreationDraft } = activeBoardSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentActiveBoard = (state) => {
