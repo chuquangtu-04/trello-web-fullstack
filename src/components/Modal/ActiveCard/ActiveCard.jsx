@@ -31,13 +31,13 @@ import { toast } from 'react-toastify'
 import CardUserGroup from './CardUserGroup'
 import CardDescriptionMdEditor from './CardDescriptionMdEditor'
 import CardActivitySection from './CardActivitySection'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { clearAndHideCurrentActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
-import { useSelector } from 'react-redux'
 import { selectCurrentActiveCard, selectIsShowModalActiveCard } from '~/redux/activeCard/activeCardSlice'
-import { updateCardDetailAPI } from '~/apis'
+import { updateCardDetailAPI, uploadFileAPI } from '~/apis'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import CardAttachmentSection from './CardAttachmentSection'
 
 
 import { styled } from '@mui/material/styles'
@@ -114,6 +114,39 @@ function ActiveCard() {
       { pending: 'Updating...' }
     )
   }
+
+  const onUploadCardAttachment = async (event) => {
+    const file = event.target?.files[0]
+    if (!file) return
+
+    const error = singleFileValidator(file)
+    if (error) {
+      toast.error(error)
+      return
+    }
+
+    try {
+      const uploadResult = await uploadFileAPI(file)
+      const newAttachmentToAdd = {
+        url: uploadResult.url,
+        fileName: file.name
+      }
+      toast.promise(
+        callApiUpdateCard({ newAttachmentToAdd }).finally(() => event.target.value = ''),
+        { pending: 'Uploading attachment...', success: 'Attachment added!' }
+      )
+    } catch (error) {
+      toast.error('Failed to upload attachment')
+    }
+  }
+
+  const onDeleteCardAttachment = (attachmentUrl) => {
+    toast.promise(
+      callApiUpdateCard({ attachmentToDelete: { url: attachmentUrl } }),
+      { pending: 'Deleting attachment...', success: 'Attachment deleted!' }
+    )
+  }
+
   // Dùng async await ở đây để component con CardActivitySection
   //  chờ và nếu thành công thì mới clear thẻ input comment
   const OnAddCardComment = async (newCommentToAdd) => {
@@ -197,6 +230,11 @@ function ActiveCard() {
               />
             </Box>
 
+            <CardAttachmentSection 
+              cardAttachments={activeCard?.attachments} 
+              onDeleteCardAttachment={onDeleteCardAttachment}
+            />
+
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <DvrOutlinedIcon />
@@ -241,7 +279,11 @@ function ActiveCard() {
                 <VisuallyHiddenInput type="file" onChange={onUploadCardCover} />
               </SidebarItem>
 
-              <SidebarItem><AttachFileOutlinedIcon fontSize="small" />Attachment</SidebarItem>
+              <SidebarItem className="active" component="label">
+                <AttachFileOutlinedIcon fontSize="small" />
+                Attachment
+                <VisuallyHiddenInput type="file" onChange={onUploadCardAttachment} />
+              </SidebarItem>
               <SidebarItem><LocalOfferOutlinedIcon fontSize="small" />Labels</SidebarItem>
               <SidebarItem><TaskAltOutlinedIcon fontSize="small" />Checklist</SidebarItem>
               <SidebarItem><WatchLaterOutlinedIcon fontSize="small" />Dates</SidebarItem>
