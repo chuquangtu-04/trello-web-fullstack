@@ -6,10 +6,17 @@ import { Card as MuiCard } from '@mui/material'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
+import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
 import { useDispatch } from 'react-redux'
 import { updateCurrentActiveCard, showModalActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { updateCardDetailAPI } from '~/apis'
+import { socketIoInstance } from '~/socketClient'
 
 function Card({ card }) {
   const dispatch = useDispatch()
@@ -36,6 +43,22 @@ function Card({ card }) {
     // Hiện modal Active Card
     dispatch(showModalActiveCard())
   }
+  
+  const handleToggleComplete = async (e) => {
+    e.stopPropagation()
+    // Optimistic Update
+    const updatedCard = { ...card, completed: !card.completed }
+    dispatch(updateCardInBoard(updatedCard))
+
+    // Gọi API update (không dùng await ở đây để UI không bị block)
+    updateCardDetailAPI(card._id, { completed: !card.completed }).catch(() => {
+        // Handle error (ví dụ revert state nếu cần thiết)
+    })
+
+    // Emit Socket để những user khác trong cùng board nhận được data
+    socketIoInstance.emit('FE_CARD_COMPLETED_TOGGLED', updatedCard)
+  }
+
   return (
     <MuiCard
       onClick={setActiveCard}
@@ -48,22 +71,59 @@ function Card({ card }) {
           cursor: 'pointer',
           overflow: 'unset',
           boxShadow: '0 1px 1px rgba(0, 0, 0, 0.2)',
-          display:  card.FE_placeholderCard ? 'none' : 'block',
+          display: card.FE_placeholderCard ? 'none' : 'block',
           border: '1px solid transparent',
-          '&:hover': { borderColor: (theme) => theme.palette.primary.main }
+          opacity: card.completed ? 0.75 : 1,
+          position: 'relative',
+          '&:hover': { borderColor: (theme) => theme.palette.primary.main },
+          '&:hover .card-checkbox': { opacity: 1, maxWidth: '32px', mr: 1 }
         }
       }>
-      { card?.cover && <CardMedia sx={{ height: 140 }} image={card.cover} title={card.title}/> }
-      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
-        <Typography>{card.title}</Typography>
+
+      {card?.cover && <CardMedia sx={{ height: 140 }} image={card.cover} title={card.title} />}
+      
+      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 }, display: 'flex', alignItems: 'flex-start' }}>
+        {/* Checkbox ẩn/hiện và đẩy text khi hover */}
+        <Box
+          className="card-checkbox"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: card.completed ? 1 : 0,
+            maxWidth: card.completed ? '32px' : '0px', // Đóng mở chiều rộng để tạo hiệu ứng đẩy
+            overflow: 'hidden',
+            transition: 'all 0.25s ease-in-out',
+            mr: card.completed ? 1 : 0,
+            mt: -0.5,
+            ml: -0.5
+          }}
+          onClick={(e) => e.stopPropagation()} // Tránh bấm vào checkbox bị trigger luôn click của thẻ nếu cần
+        >
+          <Checkbox 
+            checked={!!card.completed}
+            onChange={handleToggleComplete}
+            icon={<CheckCircleOutlineIcon />}
+            checkedIcon={<CheckCircleIcon color="success" />}
+            size="small"
+            sx={{ p: 0.5 }}
+          />
+        </Box>
+
+        <Typography sx={{ textDecoration: card.completed ? 'line-through' : 'none', mt: 0.2, wordBreak: 'break-word', transition: 'all 0.25s ease-in-out' }}>
+          {card.title}
+        </Typography>
       </CardContent>
+
       {
         shouldShowCardAction() &&
-      <CardActions sx={{ p: '0 4px 8px 4px' }}>
-        {!!card.memberIds?.length && <Button startIcon={<GroupIcon/>} size="small">{card.memberIds.length}</Button> }
-        {!!card.comments?.length && <Button startIcon={<CommentIcon/>} size="small">{card.comments.length}</Button> }
-        {!!card.attachments?.length && <Button startIcon={<AttachmentIcon/>} size="small">{card.attachments.length}</Button> }
-      </CardActions>
+        <CardActions sx={{ p: '0 4px 8px 4px', display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {!!card.memberIds?.length && <Button startIcon={<GroupIcon />} size="small">{card.memberIds.length}</Button>}
+            {!!card.comments?.length && <Button startIcon={<CommentIcon />} size="small">{card.comments.length}</Button>}
+            {!!card.attachments?.length && <Button startIcon={<AttachmentIcon />} size="small">{card.attachments.length}</Button>}
+          </Box>
+        </CardActions>
       }
     </MuiCard>
   )

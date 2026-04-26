@@ -17,7 +17,6 @@ import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import { createNewBoard, uploadBoardBackgroundAPI } from '~/apis'
 import { DEFAULT_BOARD_BACKGROUND, BOARD_BACKGROUNDS } from '~/data/boardBackgrounds'
@@ -198,36 +197,20 @@ function SidebarCreateBoardModal({ afterCreateNewBoard }) {
                         {BOARD_BACKGROUNDS.map(background => {
                           const isSelected = selectedBackground === background.url
                           return (
-                            <Tooltip
+                            <Box
                               key={background.id}
-                              title={(
-                                <Box
-                                  sx={{
-                                    width: 220,
-                                    height: 120,
-                                    borderRadius: 1,
-                                    backgroundImage: `url(${background.url})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center'
-                                  }}
-                                />
-                              )}
-                              placement="top"
-                            >
-                              <Box
-                                onClick={() => handleSelectBackground(background.url)}
-                                sx={{
-                                  height: 72,
-                                  borderRadius: 1.5,
-                                  cursor: 'pointer',
-                                  border: '2px solid',
-                                  borderColor: isSelected ? 'primary.main' : 'transparent',
-                                  backgroundImage: `url(${background.url})`,
-                                  backgroundSize: 'cover',
-                                  backgroundPosition: 'center'
-                                }}
-                              />
-                            </Tooltip>
+                              onClick={() => handleSelectBackground(background.url)}
+                              sx={{
+                                height: 72,
+                                borderRadius: 1.5,
+                                cursor: 'pointer',
+                                border: '2px solid',
+                                borderColor: isSelected ? 'primary.main' : 'transparent',
+                                backgroundImage: `url(${background.url})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                              }}
+                            />
                           )
                         })}
                       </Box>

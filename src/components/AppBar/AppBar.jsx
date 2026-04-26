@@ -38,18 +38,18 @@ function AppBar() {
         <Box sx={{ display: { 'xs': 'none', 'md': 'flex' }, alignItems: 'center', gap: 1 }}>
           <Link to='/boards'>
             <Tooltip title='Board List'>
-              <AppsIcon sx={{ color: 'white', verticalAlign: 'middle' }}/>
+              <AppsIcon sx={{ color: 'white', verticalAlign: 'middle' }} />
             </Tooltip>
           </Link>
 
           <Link to='/'>
-            <Box sx={{ display:'flex', gap: 0.5, alignItems: 'center' }}>
-              <SvgIcon component={StarIcon} fontSize='small' inheritViewBox sx={{ color: 'white' }}/>
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <SvgIcon component={StarIcon} fontSize='small' inheritViewBox sx={{ color: 'white' }} />
               <Typography variant='span' sx={{ color: 'white', fontSize: '1.2rem', fontWeight: 'bold' }}>Trello</Typography>
             </Box>
           </Link>
 
-          <WorkSpaces />
+          {/* <WorkSpaces />
           <Recent/>
           <Starred/>
           <Templates/>
@@ -60,22 +60,22 @@ function AppBar() {
               backgroundColor: 'transparent'
             } }}
           >
-            Create</Button>
+            Create</Button> */}
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {/* Tìm kiếm nhanh 1 hoặc nhiều board */}
-        <AutoCompleteSearchBoard/>
+        <AutoCompleteSearchBoard />
         {/* Hiện thị dark light systems mode */}
-        <ModeSelect/>
+        <ModeSelect />
         {/* Xử lý hiện thị các thông báo */}
-        <Notifications/>
+        <Notifications />
 
         <Tooltip title="Help">
-          <HelpOutlineIcon sx={{ cursor: 'pointer', color: 'white' }}/>
+          <HelpOutlineIcon sx={{ cursor: 'pointer', color: 'white' }} />
         </Tooltip>
 
-        <Profiles/>
+        <Profiles />
       </Box>
     </Box>
   )

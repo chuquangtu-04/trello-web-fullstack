@@ -18,6 +18,8 @@ import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import { Link, useLocation } from 'react-router-dom'
 import SidebarCreateBoardModal from './create'
+import { TemplatesView } from './templates'
+import { HomeView } from './home'
 import { fetchBoardsAPI } from '~/apis'
 
 import { styled } from '@mui/material/styles'
@@ -45,6 +47,8 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 function Boards() {
   const dispatch = useDispatch()
   dispatch(updateCurrentActiveBoard(null))
+
+  const [activeSidebar, setActiveSidebar] = useState('home')
 
   // Số lượng bản ghi boards hiển thị tối đa trên 1 page tùy dự án (thường sẽ là 12 cái)
   const [boards, setBoards] = useState(null)
@@ -104,15 +108,24 @@ function Boards() {
         <Grid container spacing={2}>
           <Grid xs={12} sm={3}>
             <Stack direction="column" spacing={1}>
-              <SidebarItem className="active">
+              <SidebarItem
+                className={activeSidebar === 'boards' ? 'active' : ''}
+                onClick={() => setActiveSidebar('boards')}
+              >
                 <SpaceDashboardIcon fontSize="small" />
                 Boards
               </SidebarItem>
-              <SidebarItem>
+              <SidebarItem
+                className={activeSidebar === 'templates' ? 'active' : ''}
+                onClick={() => setActiveSidebar('templates')}
+              >
                 <ListAltIcon fontSize="small" />
                 Templates
               </SidebarItem>
-              <SidebarItem>
+              <SidebarItem
+                className={activeSidebar === 'home' ? 'active' : ''}
+                onClick={() => setActiveSidebar('home')}
+              >
                 <HomeIcon fontSize="small" />
                 Home
               </SidebarItem>
@@ -124,131 +137,139 @@ function Boards() {
           </Grid>
 
           <Grid xs={12} sm={9}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Your boards:</Typography>
+            {activeSidebar === 'home' ? (
+              <HomeView setActiveSidebar={setActiveSidebar} />
+            ) : activeSidebar === 'templates' ? (
+              <TemplatesView afterCreateNewBoard={() => {
+                setActiveSidebar('boards')
+                afterCreateNewBoard()
+              }} />
+            ) : (
+              <>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Your boards:</Typography>
 
-            {/* Trường hợp gọi API nhưng không tồn tại cái board nào trong Database trả về */}
-            {boards?.length === 0 &&
-              <Typography variant="span" sx={{ fontWeight: 'bold', mb: 3 }}>No result found!</Typography>
-            }
+                {/* Trường hợp gọi API nhưng không tồn tại cái board nào trong Database trả về */}
+                {boards?.length === 0 &&
+                  <Typography variant="span" sx={{ fontWeight: 'bold', mb: 3 }}>No result found!</Typography>
+                }
 
-            {/* Trường hợp gọi API và có boards trong Database trả về thì render danh sách boards */}
-            {boards?.length > 0 &&
-              <Grid container spacing={2}>
-                {boards.map(b =>
-                  <Grid
-                    xs={12}
-                    sm={6}
-                    md={4}
-                    lg={3}
-                    key={b._id}
-                    sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}
-                  >
-                    <Card
-                      sx={{
-                        width: 280,
-                        minWidth: 280,
-                        maxWidth: 280,
-                        height: 190,
-                        minHeight: 190,
-                        maxHeight: 190,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        borderRadius: 2
-                      }}
-                    >
-                      {/* Ý tưởng mở rộng về sau làm ảnh Cover cho board nhé */}
-                      {/* <CardMedia component="img" height="100" image="https://picsum.photos/100" /> */}
-                      <Box
-                        sx={{
-                          height: 64,
-                          backgroundImage: b?.background ? `url(${b.background})` : 'none',
-                          backgroundPosition: 'center',
-                          backgroundSize: 'cover',
-                          backgroundRepeat: 'no-repeat',
-                          backgroundColor: b?.background ? 'transparent' : 'primary.light'
-                        }}
-                      ></Box>
-
-                      <CardContent
-                        sx={{
-                          p: 1.5,
-                          '&:last-child': { p: 1.5 },
-                          display: 'flex',
-                          flexDirection: 'column',
-                          flex: 1
-                        }}
+                {/* Trường hợp gọi API và có boards trong Database trả về thì render danh sách boards */}
+                {boards?.length > 0 &&
+                  <Grid container spacing={2}>
+                    {boards.map(b =>
+                      <Grid
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        key={b._id}
+                        sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}
                       >
-                        <Typography
-                          gutterBottom
-                          variant="h6"
-                          component="div"
+                        <Card
                           sx={{
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            textOverflow: 'ellipsis',
-                            minHeight: 32,
-                            maxWidth: '100%'
-                          }}
-                        >
-                          {b?.title}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            minHeight: 40
-                          }}
-                        >
-                          {b?.description}
-                        </Typography>
-                        <Box
-                          component={Link}
-                          to={`/boards/${b._id}`}
-                          sx={{
-                            mt: 'auto',
+                            width: 280,
+                            minWidth: 280,
+                            maxWidth: 280,
+                            height: 190,
+                            minHeight: 190,
+                            maxHeight: 190,
                             display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            color: 'primary.main',
-                            '&:hover': { color: 'primary.light' }
-                          }}>
-                          Go to board <ArrowRightIcon fontSize="small" />
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                )}
-              </Grid>
-            }
+                            flexDirection: 'column',
+                            borderRadius: 2
+                          }}
+                        >
+                          {/* Ý tưởng mở rộng về sau làm ảnh Cover cho board nhé */}
+                          {/* <CardMedia component="img" height="100" image="https://picsum.photos/100" /> */}
+                          <Box
+                            sx={{
+                              height: 64,
+                              backgroundImage: b?.background ? `url(${b.background})` : 'none',
+                              backgroundPosition: 'center',
+                              backgroundSize: 'cover',
+                              backgroundRepeat: 'no-repeat',
+                              backgroundColor: b?.background ? 'transparent' : 'primary.light'
+                            }}
+                          ></Box>
 
-            {/* Trường hợp gọi API và có totalBoards trong Database trả về thì render khu vực phân trang  */}
-            {(totalBoards > 0) &&
-              <Box sx={{ my: 3, pr: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                <Pagination
-                  size="large"
-                  color="secondary"
-                  showFirstButton
-                  showLastButton
-                  // Giá trị prop count của component Pagination là để hiển thị tổng số lượng page, công thức là lấy Tổng số lượng bản ghi chia cho số lượng bản ghi muốn hiển thị trên 1 page (ví dụ thường để 12, 24, 26, 48...vv). sau cùng là làm tròn số lên bằng hàm Math.ceil
-                  count={Math.ceil(totalBoards / DEFAULT_ITEMS_PER_PAGE)}
-                  // Giá trị của page hiện tại đang đứng
-                  page={page}
-                  // Render các page item và đồng thời cũng là những cái link để chúng ta click chuyển trang
-                  renderItem={(item) => (
-                    <PaginationItem
-                      component={Link}
-                      to={`/boards${item.page === '' ? DEFAULT_PAGE : `?page=${item.page}`}`}
-                      {...item}
+                          <CardContent
+                            sx={{
+                              p: 1.5,
+                              '&:last-child': { p: 1.5 },
+                              display: 'flex',
+                              flexDirection: 'column',
+                              flex: 1
+                            }}
+                          >
+                            <Typography
+                              gutterBottom
+                              variant="h6"
+                              component="div"
+                              sx={{
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis',
+                                minHeight: 32,
+                                maxWidth: '100%'
+                              }}
+                            >
+                              {b?.title}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                minHeight: 40
+                              }}
+                            >
+                              {b?.description}
+                            </Typography>
+                            <Box
+                              component={Link}
+                              to={`/boards/${b._id}`}
+                              sx={{
+                                mt: 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-end',
+                                color: 'primary.main',
+                                '&:hover': { color: 'primary.light' }
+                              }}>
+                              Go to board <ArrowRightIcon fontSize="small" />
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                  </Grid>
+                }
+
+                {/* Trường hợp gọi API và có totalBoards trong Database trả về thì render khu vực phân trang  */}
+                {(totalBoards > 0) &&
+                  <Box sx={{ my: 3, pr: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <Pagination
+                      size="large"
+                      color="secondary"
+                      showFirstButton
+                      showLastButton
+                      count={Math.ceil(totalBoards / DEFAULT_ITEMS_PER_PAGE)}
+                      page={page}
+                      renderItem={(item) => (
+                        <PaginationItem
+                          component={Link}
+                          to={`/boards${item.page === '' ? DEFAULT_PAGE : `?page=${item.page}`}`}
+                          {...item}
+                        />
+                      )}
                     />
-                  )}
-                />
-              </Box>
-            }
+                  </Box>
+                }
+              </>
+            )}
           </Grid>
         </Grid>
       </Box>

@@ -18,9 +18,10 @@ import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import {
   fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  updateCurrentActiveBoard,
+  updateCardInBoard
 } from '~/redux/activeBoard/activeBoardSlice'
-
+import { socketIoInstance } from '~/socketClient'
 
 function Board() {
   // Không dùng State của component nữa mà chuyển qua dùng State của Redux
@@ -34,6 +35,39 @@ function Board() {
     // Call Api
     dispatch(fetchBoardDetailsAPI(boardId))
   }, [dispatch, boardId])
+
+  useEffect(() => {
+    // Listen to real-time update card event
+    const onCardUpdate = (updatedCard) => {
+      // Chỉ update nếu card thuộc board đang xem
+      if (updatedCard.boardId === boardId) {
+        dispatch(updateCardInBoard(updatedCard))
+      }
+    }
+    socketIoInstance.on('BE_CARD_COMPLETED_TOGGLED', onCardUpdate)
+
+    return () => {
+      socketIoInstance.off('BE_CARD_COMPLETED_TOGGLED', onCardUpdate)
+    }
+  }, [dispatch, boardId])
+
+  useEffect(() => {
+    if (board?._id) {
+      const recentBoards = JSON.parse(localStorage.getItem('recentBoards') || '[]')
+      const currentBoardInfo = {
+        _id: board._id,
+        title: board.title,
+        background: board.background
+      }
+      
+      // Đưa board đang xem lên đầu, xóa bản ghi cũ nếu đã có
+      const updatedBoards = recentBoards.filter(b => b._id !== board._id)
+      updatedBoards.unshift(currentBoardInfo)
+      
+      // Chỉ giữ tối đa 4 boards gần nhất
+      localStorage.setItem('recentBoards', JSON.stringify(updatedBoards.slice(0, 4)))
+    }
+  }, [board?._id, board?.title, board?.background])
 
   const boardBackgroundStyles = useMemo(() => {
     if (!board?.background) {
