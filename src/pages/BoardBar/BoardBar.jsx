@@ -9,6 +9,12 @@ import { capitalizeFirstLetter } from '~/utils/formatters'
 import Archive from './Archive'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
+import FilterPanel from './FilterPanel'
+import { useState } from 'react'
+import Badge from '@mui/material/Badge'
+import { useSelector } from 'react-redux'
+import { selectFilters } from '~/redux/activeBoard/activeBoardSlice'
+
 const MENU_STYLE = {
   color: 'primary.main',
   backgroundColor: 'white',
@@ -22,6 +28,21 @@ const MENU_STYLE = {
     backgroundColor: 'primary.50'
   } }
 function BoardBar({ board }) {
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null)
+  const filters = useSelector(selectFilters)
+  const isOpenFilter = Boolean(filterAnchorEl)
+
+  const handleOpenFilter = (event) => {
+    setFilterAnchorEl(event.currentTarget)
+  }
+
+  const handleCloseFilter = () => {
+    setFilterAnchorEl(null)
+  }
+
+  // Đếm số lượng filter đang active để hiện badge
+  const activeFilterCount = (filters.keyword ? 1 : 0) + filters.memberIds.length + filters.status.length
+
   return (
     <Box sx={{
       width: '100%',
@@ -65,11 +86,18 @@ function BoardBar({ board }) {
           label="Automatic"
           onClick={() => {}}
         />
-        <Chip
-          sx={MENU_STYLE}
-          icon={<FilterListIcon />}
-          label="Filters"
-          onClick={() => {}}
+        <Badge color="error" variant="dot" invisible={activeFilterCount === 0}>
+          <Chip
+            sx={MENU_STYLE}
+            icon={<FilterListIcon />}
+            label="Filters"
+            onClick={handleOpenFilter}
+          />
+        </Badge>
+        <FilterPanel 
+          anchorEl={filterAnchorEl} 
+          isOpen={isOpenFilter} 
+          onClose={handleCloseFilter} 
         />
         <Archive/>
       </Box>

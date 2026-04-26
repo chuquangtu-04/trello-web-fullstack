@@ -28,6 +28,9 @@ import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/acti
 import { updateColumnDetailAPI } from '~/apis'
 import ListCards from './ListCarts/ListCards'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
+import { selectFilters } from '~/redux/activeBoard/activeBoardSlice'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+import { filterCards } from '~/utils/filterCards'
 
 
 function Column({ column }) {
@@ -35,9 +38,13 @@ function Column({ column }) {
   const board = useSelector(selectCurrentActiveBoard)
   const [openNewCardFrom, setOpenNewCardFrom] = useState(false)
   const toggleOpenNewCardFrom = () => setOpenNewCardFrom(!openNewCardFrom)
-  const [newCardTitle, setNewCardTitle] = useState('')
+  const newCardTitle = useState('')
+  const [newCardTitleValue, setNewCardTitleValue] = useState('')
   const [anchorEl, setAnchorEl] = useState(null)
   const orderedCard = column.cards
+  const filters = useSelector(selectFilters)
+  const currentUser = useSelector(selectCurrentUser)
+  const filteredCards = filterCards(orderedCard, filters, currentUser)
   const open = Boolean(anchorEl)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -65,12 +72,12 @@ function Column({ column }) {
   }
 
   const addNewCard = async () => {
-    if (!newCardTitle) {
+    if (!newCardTitleValue) {
       toast.error('Please enter Card title', { position: 'bottom-right' })
       return
     }
     const createNewCard = {
-      title: newCardTitle,
+      title: newCardTitleValue,
       columnId: column._id
     }
     const createdNewCard = await createNewCardAPI({ ...createNewCard, boardId: board._id })
@@ -92,9 +99,11 @@ function Column({ column }) {
     //   columnToUpdate.cards.push(createdNewCard)
     //   columnToUpdate.cardOrderIds.push(createNewCard._id)
     // }
+    // columnToUpdate.cardOrderIds.push(createNewCard._id)
+    // }
     // setBoard(newBoard)
     dispatch(updateCurrentActiveBoard(newBoard))
-    setNewCardTitle('')
+    setNewCardTitleValue('')
     toggleOpenNewCardFrom()
   }
 
@@ -250,7 +259,7 @@ function Column({ column }) {
           </Box>
         </Box>
         {/*Box Column List Card */}
-        <ListCards cards={orderedCard}/>
+        <ListCards cards={filteredCards}/>
         {/*Box Column Footer */}
         <Box sx={
           {
@@ -286,8 +295,8 @@ function Column({ column }) {
                 gap: 1
               }}>
                 <TextField
-                  value={newCardTitle}
-                  onChange={(e) => {setNewCardTitle(e.target.value)}}
+                  value={newCardTitleValue}
+                  onChange={(e) => {setNewCardTitleValue(e.target.value)}}
                   spellCheck={false}
                   label="Enter Card title..."
                   type="text"
