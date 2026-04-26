@@ -19,6 +19,13 @@ export const uploadBoardBackgroundAPI = async (file) => {
   return res.data
 }
 
+export const uploadFileAPI = async (file) => {
+  const formData = new FormData()
+  formData.append('image', file)
+  const res = await post('upload', formData)
+  return res.data
+}
+
 export const fetchBoardDetailsSoftColumnAPI = async (id) => {
   const res = await get(`boards/boards-soft-column/${id}`)
   return res.data
