@@ -126,4 +126,18 @@ export const refreshTokenAPI = async () => {
   return response.data
 }
 
+/** Labels */
+export const createLabelAPI = async (boardId, data) => {
+  const res = await post(`boards/${boardId}/labels`, data)
+  return res.data
+}
 
+export const updateLabelAPI = async (boardId, labelId, data) => {
+  const res = await put(`boards/${boardId}/labels/${labelId}`, data)
+  return res.data
+}
+
+export const deleteLabelAPI = async (boardId, labelId) => {
+  const res = await deleted(`boards/${boardId}/labels/${labelId}`)
+  return res.data
+}

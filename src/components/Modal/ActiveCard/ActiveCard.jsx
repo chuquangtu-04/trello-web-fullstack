@@ -34,14 +34,17 @@ import CardActivitySection from './CardActivitySection'
 import { useDispatch, useSelector } from 'react-redux'
 import { clearAndHideCurrentActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { selectCurrentActiveCard, selectIsShowModalActiveCard } from '~/redux/activeCard/activeCardSlice'
-import { updateCardDetailAPI, uploadFileAPI } from '~/apis'
-import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { updateCardDetailAPI, uploadFileAPI, createLabelAPI, updateLabelAPI, deleteLabelAPI } from '~/apis'
+import { updateCardInBoard, selectCurrentActiveBoard, addLabelToBoard, updateLabelInBoard, removeLabelFromBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import CardAttachmentSection from './CardAttachmentSection'
+import LabelBadge from './Labels/LabelBadge'
+import LabelPicker from './Labels/LabelPicker'
 
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
+import { useState } from 'react'
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -70,6 +73,12 @@ function ActiveCard() {
   const activeCard = useSelector(selectCurrentActiveCard)
   const isShowModalActiveCard = useSelector(selectIsShowModalActiveCard)
   const currentUser = useSelector(selectCurrentUser)
+  const activeBoard = useSelector(selectCurrentActiveBoard)
+  const boardLabels = activeBoard?.labels || []
+
+  // State cho LabelPicker
+  const [labelAnchorEl, setLabelAnchorEl] = useState(null)
+  const isLabelPickerOpen = Boolean(labelAnchorEl)
   // Không dùng biến State để check đóng mở modal nữa vì chúng ta sẽ check bên board|_id.jsx
   // const [isOpen, setIsOpen] = useState(true)
   // const handleOpenModal = () => setIsOpen(true)
@@ -157,6 +166,65 @@ function ActiveCard() {
     callApiUpdateCard({ incomingMemberInfo })
   }
 
+  // ============================================================
+  // Label handlers
+  // ============================================================
+  const handleOpenLabelPicker = (e) => setLabelAnchorEl(e.currentTarget)
+  const handleCloseLabelPicker = () => setLabelAnchorEl(null)
+
+  const onToggleLabel = async (labelId) => {
+    // Optimistic update
+    const currentLabelIds = activeCard?.labelIds || []
+    const isRemoving = currentLabelIds.includes(labelId)
+    const newLabelIds = isRemoving
+      ? currentLabelIds.filter(id => id !== labelId)
+      : [...currentLabelIds, labelId]
+    const optimisticCard = { ...activeCard, labelIds: newLabelIds }
+    dispatch(updateCurrentActiveCard(optimisticCard))
+    dispatch(updateCardInBoard(optimisticCard))
+    // Gọi API
+    try {
+      const updated = await updateCardDetailAPI(activeCard._id, { toggleLabelId: labelId })
+      dispatch(updateCurrentActiveCard(updated))
+      dispatch(updateCardInBoard(updated))
+    } catch (err) {
+      // Revert nếu lỗi
+      dispatch(updateCurrentActiveCard(activeCard))
+      dispatch(updateCardInBoard(activeCard))
+    }
+  }
+
+  const onCreateLabel = async (data) => {
+    try {
+      const result = await createLabelAPI(activeBoard._id, data)
+      dispatch(addLabelToBoard(result.labels))
+      // Tự động gán label vừa tạo vào card
+      await onToggleLabel(result.label.id)
+    } catch (err) {
+      // error handled by axios interceptor
+    }
+  }
+
+  const onUpdateLabel = async (labelId, data) => {
+    try {
+      const result = await updateLabelAPI(activeBoard._id, labelId, data)
+      dispatch(updateLabelInBoard(result.labels))
+    } catch (err) {}
+  }
+
+  const onDeleteLabel = async (labelId) => {
+    try {
+      await deleteLabelAPI(activeBoard._id, labelId)
+      dispatch(removeLabelFromBoard(labelId))
+      // Cũng update activeCard nếu nó đang có label đó
+      if (activeCard?.labelIds?.includes(labelId)) {
+        const updated = { ...activeCard, labelIds: activeCard.labelIds.filter(id => id !== labelId) }
+        dispatch(updateCurrentActiveCard(updated))
+        dispatch(updateCardInBoard(updated))
+      }
+    } catch (err) {}
+  }
+
   return (
     <Modal
       disableScrollLock
@@ -186,12 +254,12 @@ function ActiveCard() {
         </Box>
         {
           activeCard?.cover &&
-        <Box sx={{ mb: 4 }}>
-          <img
-            style={{ width: '100%', height: '320px', borderRadius: '6px', objectFit: 'cover' }}
-            src={activeCard?.cover}
-          />
-        </Box>
+          <Box sx={{ mb: 4 }}>
+            <img
+              style={{ width: '100%', height: '320px', borderRadius: '6px', objectFit: 'cover' }}
+              src={activeCard?.cover}
+            />
+          </Box>
         }
 
         <Box sx={{ mb: 1, mt: -3, pr: 2.5, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -230,8 +298,24 @@ function ActiveCard() {
               />
             </Box>
 
-            <CardAttachmentSection 
-              cardAttachments={activeCard?.attachments} 
+            {/* Labels section */}
+            {(activeCard?.labelIds?.length > 0) && (
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                  <LocalOfferOutlinedIcon />
+                  <Typography variant="span" sx={{ fontWeight: '600', fontSize: '20px' }}>Labels</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                  {(activeCard.labelIds || []).map(lid => {
+                    const label = boardLabels.find(l => l.id === lid)
+                    return label ? <LabelBadge key={lid} label={label} animate /> : null
+                  })}
+                </Box>
+              </Box>
+            )}
+
+            <CardAttachmentSection
+              cardAttachments={activeCard?.attachments}
               onDeleteCardAttachment={onDeleteCardAttachment}
             />
 
@@ -268,7 +352,7 @@ function ActiveCard() {
                     })}
                   >
                     <PersonOutlineOutlinedIcon fontSize="small" />
-                Join
+                    Join
                   </SidebarItem>
               }
 
@@ -284,7 +368,22 @@ function ActiveCard() {
                 Attachment
                 <VisuallyHiddenInput type="file" onChange={onUploadCardAttachment} />
               </SidebarItem>
-              <SidebarItem><LocalOfferOutlinedIcon fontSize="small" />Labels</SidebarItem>
+              {/* Feature Labels Picker */}
+              <SidebarItem className="active" onClick={handleOpenLabelPicker}>
+                <LocalOfferOutlinedIcon fontSize="small" />
+                Labels
+              </SidebarItem>
+              <LabelPicker
+                anchorEl={labelAnchorEl}
+                isOpen={isLabelPickerOpen}
+                onClose={handleCloseLabelPicker}
+                boardLabels={boardLabels}
+                cardLabelIds={activeCard?.labelIds || []}
+                onToggle={onToggleLabel}
+                onCreateLabel={onCreateLabel}
+                onUpdateLabel={onUpdateLabel}
+                onDeleteLabel={onDeleteLabel}
+              />
               <SidebarItem><TaskAltOutlinedIcon fontSize="small" />Checklist</SidebarItem>
               <SidebarItem><WatchLaterOutlinedIcon fontSize="small" />Dates</SidebarItem>
               <SidebarItem><AutoFixHighOutlinedIcon fontSize="small" />Custom Fields</SidebarItem>

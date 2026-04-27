@@ -12,14 +12,18 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { updateCurrentActiveCard, showModalActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { updateCardDetailAPI } from '~/apis'
 import { socketIoInstance } from '~/socketClient'
+import LabelBadge from '~/components/Modal/ActiveCard/Labels/LabelBadge'
 
 function Card({ card }) {
   const dispatch = useDispatch()
+  const activeBoard = useSelector(selectCurrentActiveBoard)
+  const boardLabels = activeBoard?.labels || []
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card }
@@ -43,7 +47,7 @@ function Card({ card }) {
     // Hiện modal Active Card
     dispatch(showModalActiveCard())
   }
-  
+
   const handleToggleComplete = async (e) => {
     e.stopPropagation()
     // Optimistic Update
@@ -52,7 +56,7 @@ function Card({ card }) {
 
     // Gọi API update (không dùng await ở đây để UI không bị block)
     updateCardDetailAPI(card._id, { completed: !card.completed }).catch(() => {
-        // Handle error (ví dụ revert state nếu cần thiết)
+      // Handle error (ví dụ revert state nếu cần thiết)
     })
 
     // Emit Socket để những user khác trong cùng board nhận được data
@@ -81,8 +85,20 @@ function Card({ card }) {
       }>
 
       {card?.cover && <CardMedia sx={{ height: 140 }} image={card.cover} title={card.title} />}
-      
-      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 }, display: 'flex', alignItems: 'flex-start' }}>
+
+      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        {/* Label badges (compact) */}
+        {card?.labelIds?.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.25 }}>
+            {card.labelIds.map(lid => {
+              const label = boardLabels.find(l => l.id === lid)
+              return label ? <LabelBadge key={lid} label={label} compact /> : null
+            })}
+          </Box>
+        )}
+
+        {/* Checkbox + Title row */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
         {/* Checkbox ẩn/hiện và đẩy text khi hover */}
         <Box
           className="card-checkbox"
@@ -100,7 +116,7 @@ function Card({ card }) {
           }}
           onClick={(e) => e.stopPropagation()} // Tránh bấm vào checkbox bị trigger luôn click của thẻ nếu cần
         >
-          <Checkbox 
+          <Checkbox
             checked={!!card.completed}
             onChange={handleToggleComplete}
             icon={<CheckCircleOutlineIcon />}
@@ -113,6 +129,7 @@ function Card({ card }) {
         <Typography sx={{ textDecoration: card.completed ? 'line-through' : 'none', mt: 0.2, wordBreak: 'break-word', transition: 'all 0.25s ease-in-out' }}>
           {card.title}
         </Typography>
+        </Box>
       </CardContent>
 
       {
