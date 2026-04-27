@@ -141,3 +141,9 @@ export const deleteLabelAPI = async (boardId, labelId) => {
   const res = await deleted(`boards/${boardId}/labels/${labelId}`)
   return res.data
 }
+
+/** Column Copy */
+export const copyColumnAPI = async (columnId, data) => {
+  const response = await post(`columns/copy/${columnId}`, data)
+  return response.data
+}

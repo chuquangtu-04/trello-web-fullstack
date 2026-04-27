@@ -23,14 +23,15 @@ import { useConfirm } from 'material-ui-confirm'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { createNewCardAPI, deleteColumnAPI } from '~/apis'
+import { createNewCardAPI, deleteColumnAPI, updateColumnDetailAPI, copyColumnAPI } from '~/apis'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-import { updateColumnDetailAPI } from '~/apis'
 import ListCards from './ListCarts/ListCards'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { selectFilters } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { filterCards } from '~/utils/filterCards'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import CopyColumnPopover from './CopyColumnPopover'
 
 
 function Column({ column }) {
@@ -46,6 +47,9 @@ function Column({ column }) {
   const currentUser = useSelector(selectCurrentUser)
   const filteredCards = filterCards(orderedCard, filters, currentUser)
   const open = Boolean(anchorEl)
+
+  const [copyAnchorEl, setCopyAnchorEl] = useState(null)
+  const isCopyOpen = Boolean(copyAnchorEl)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
@@ -69,6 +73,32 @@ function Column({ column }) {
   }
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleOpenCopyModal = (event) => {
+    setCopyAnchorEl(anchorEl) // Dùng anchor của menu hoặc event
+    handleClose()
+  }
+
+  const handleCopyColumn = async (newTitle) => {
+    try {
+      const copiedColumn = await copyColumnAPI(column._id, { newTitle })
+
+      if (!copiedColumn.cards || copiedColumn.cards.length === 0) {
+        copiedColumn.cards = [generatePlaceholderCard(copiedColumn)]
+        copiedColumn.cardOrderIds = [generatePlaceholderCard(copiedColumn)._id]
+      }
+
+      const newBoard = cloneDeep(board)
+      newBoard.columns.push(copiedColumn)
+      newBoard.columnOrderIds.push(copiedColumn._id)
+      dispatch(updateCurrentActiveBoard(newBoard))
+
+      toast.success('Đã sao chép danh sách thành công')
+      setCopyAnchorEl(null)
+    } catch (error) {
+      // lỗi được catch bởi interceptor
+    }
   }
 
   const addNewCard = async () => {
@@ -128,16 +158,17 @@ function Column({ column }) {
         dispatch(updateCurrentActiveBoard(newBoard))
 
         deleteColumnAPI({ columnId: columnData._id }).then((res) => {
-          toast.success(res.message)})
+          toast.success(res.message)
+        })
       })
       .catch(
-        () => {}
+        () => { }
       )
   }
 
   const onUpdateColumnTitle = (newTitle) => {
     // Gọi API update lại title của column
-    updateColumnDetailAPI(column._id, { title: newTitle, fieldName: 'title' } )
+    updateColumnDetailAPI(column._id, { title: newTitle, fieldName: 'title' })
       .then(() => {
         const newBoard = cloneDeep(board)
 
@@ -175,7 +206,7 @@ function Column({ column }) {
         {/*Box Column Header */}
         <Box sx={
           {
-            height: ( theme ) => (theme.trello.column_header_height),
+            height: (theme) => (theme.trello.column_header_height),
             p: 2,
             display: 'flex',
             justifyContent: 'space-between',
@@ -229,18 +260,18 @@ function Column({ column }) {
                 <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Add new cart</ListItemText>
               </MenuItem>
-              <MenuItem onClick={handleClose}>
+              {/* <MenuItem onClick={handleClose}>
                 <ListItemIcon><ContentCut fontSize="small" /></ListItemIcon>
                 <ListItemText>Cut</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handleClose}>
+              </MenuItem> */}
+              <MenuItem onClick={handleOpenCopyModal}>
                 <ListItemIcon><ContentCopy fontSize="small" /></ListItemIcon>
                 <ListItemText>Copy</ListItemText>
               </MenuItem>
-              <MenuItem onClick={handleClose}>
+              {/* <MenuItem onClick={handleClose}>
                 <ListItemIcon><ContentPaste fontSize="small" /></ListItemIcon>
                 <ListItemText>Paste</ListItemText>
-              </MenuItem>
+              </MenuItem> */}
               <Divider />
               <MenuItem onClick={handleDeleteColumn}
                 sx={
@@ -248,22 +279,30 @@ function Column({ column }) {
                     '&:hover': { color: 'red', '& .delete-forever-icon': { color: 'red' } }
                   }
                 }>
-                <ListItemIcon sx={{ ml: '-3px' }}><DeleteForeverIcon className='delete-forever-icon' fontSize="medium"/></ListItemIcon>
-                <ListItemText>Delete this column</ListItemText>
+                <ListItemIcon sx={{ ml: '-3px' }}><DeleteForeverIcon className='delete-forever-icon' fontSize="medium" /></ListItemIcon>
+                <ListItemText>Delete column</ListItemText>
               </MenuItem>
               <MenuItem onClick={handleClose}>
                 <ListItemIcon><Cloud fontSize="small" /></ListItemIcon>
-                <ListItemText>Archive this column</ListItemText>
+                <ListItemText>Delete all cards</ListItemText>
               </MenuItem>
             </Menu>
+
+            <CopyColumnPopover
+              anchorEl={copyAnchorEl}
+              isOpen={isCopyOpen}
+              onClose={() => setCopyAnchorEl(null)}
+              columnTitle={column.title}
+              onCopy={handleCopyColumn}
+            />
           </Box>
         </Box>
         {/*Box Column List Card */}
-        <ListCards cards={filteredCards}/>
+        <ListCards cards={filteredCards} />
         {/*Box Column Footer */}
         <Box sx={
           {
-            height: ( theme ) => (theme.trello.column_footer_height),
+            height: (theme) => (theme.trello.column_footer_height),
             p: 2
           }
         }>
@@ -278,13 +317,13 @@ function Column({ column }) {
               }}>
                 <Button
                   onClick={toggleOpenNewCardFrom}
-                  startIcon={<AddCardIcon/>}
+                  startIcon={<AddCardIcon />}
                 >
-                Add new cart</Button>
+                  Add new cart</Button>
                 <Tooltip title='Drag to move'>
                   <DragHandleIcon sx={{
                     cursor: 'pointer'
-                  }}/>
+                  }} />
                 </Tooltip>
               </Box>
               :
@@ -296,7 +335,7 @@ function Column({ column }) {
               }}>
                 <TextField
                   value={newCardTitleValue}
-                  onChange={(e) => {setNewCardTitleValue(e.target.value)}}
+                  onChange={(e) => { setNewCardTitleValue(e.target.value) }}
                   spellCheck={false}
                   label="Enter Card title..."
                   type="text"
@@ -317,7 +356,7 @@ function Column({ column }) {
                         '&.Mui-focused fieldset': { borderColor: (theme) => theme.palette.primary.light }
                       }
                     }
-                  }/>
+                  } />
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
