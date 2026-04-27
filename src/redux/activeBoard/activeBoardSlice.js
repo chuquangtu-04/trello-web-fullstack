@@ -74,6 +74,34 @@ export const activeBoardSlice = createSlice({
     },
     updateFilters: (state, action) => {
       state.filters = action.payload
+    },
+    // Thêm label mới vào board
+    addLabelToBoard: (state, action) => {
+      if (state.currentActiveBoard) {
+        if (!state.currentActiveBoard.labels) state.currentActiveBoard.labels = []
+        state.currentActiveBoard.labels = action.payload
+      }
+    },
+    // Cập nhật label trong board
+    updateLabelInBoard: (state, action) => {
+      if (state.currentActiveBoard) {
+        state.currentActiveBoard.labels = action.payload
+      }
+    },
+    // Xóa label khỏi board
+    removeLabelFromBoard: (state, action) => {
+      const labelId = action.payload
+      if (state.currentActiveBoard) {
+        state.currentActiveBoard.labels = (state.currentActiveBoard.labels || []).filter(l => l.id !== labelId)
+        // Cũng xóa labelId khỏi tất cả card trong state
+        state.currentActiveBoard.columns?.forEach(col => {
+          col.cards?.forEach(card => {
+            if (card.labelIds) {
+              card.labelIds = card.labelIds.filter(id => id !== labelId)
+            }
+          })
+        })
+      }
     }
   },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
@@ -91,7 +119,7 @@ export const activeBoardSlice = createSlice({
       board.columns.forEach(column => {
         if (isEmpty(column.cards)) {
           column.cards = [generatePlaceholderCard(column)],
-          column.cardOrderIds = [generatePlaceholderCard(column)._id]
+            column.cardOrderIds = [generatePlaceholderCard(column)._id]
         } else {
           // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ liệu xuống bên dưới các component
           column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
@@ -106,7 +134,7 @@ export const activeBoardSlice = createSlice({
 
 // Actions: Là nơi dành cho các components bên dưới gọi bằng dispatch() tới nó để cập nhật lại dữ liệu thông qua reducer (chạy đồng bộ)
 // Để ý ở trên thì không thấy properties actions đâu cả, bởi vì những cái actions này đơn giản là được thằng redux tạo tự động theo tên của reducer nhé.
-export const { updateCurrentActiveBoard, updateCardInBoard, setBoardCreationDraft, updateFilters } = activeBoardSlice.actions
+export const { updateCurrentActiveBoard, updateCardInBoard, setBoardCreationDraft, updateFilters, addLabelToBoard, updateLabelInBoard, removeLabelFromBoard } = activeBoardSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentActiveBoard = (state) => {

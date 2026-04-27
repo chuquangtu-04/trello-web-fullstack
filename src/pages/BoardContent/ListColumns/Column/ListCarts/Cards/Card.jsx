@@ -12,14 +12,19 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { updateCurrentActiveCard, showModalActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { updateCardDetailAPI } from '~/apis'
 import { socketIoInstance } from '~/socketClient'
+import LabelBadge from '~/components/Modal/ActiveCard/Labels/LabelBadge'
+import DateBadge from '~/components/Modal/ActiveCard/Dates/DateBadge'
 
 function Card({ card }) {
   const dispatch = useDispatch()
+  const activeBoard = useSelector(selectCurrentActiveBoard)
+  const boardLabels = activeBoard?.labels || []
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card }
@@ -34,7 +39,7 @@ function Card({ card }) {
   }
 
   const shouldShowCardAction = () => {
-    return !!card.memberIds?.length || !!card.comments?.length || !!card.attachments?.length
+    return !!card.memberIds?.length || !!card.comments?.length || !!card.attachments?.length || !!card.dueDate
   }
 
   const setActiveCard = () => {
@@ -43,7 +48,7 @@ function Card({ card }) {
     // Hiện modal Active Card
     dispatch(showModalActiveCard())
   }
-  
+
   const handleToggleComplete = async (e) => {
     e.stopPropagation()
     // Optimistic Update
@@ -52,7 +57,7 @@ function Card({ card }) {
 
     // Gọi API update (không dùng await ở đây để UI không bị block)
     updateCardDetailAPI(card._id, { completed: !card.completed }).catch(() => {
-        // Handle error (ví dụ revert state nếu cần thiết)
+      // Handle error (ví dụ revert state nếu cần thiết)
     })
 
     // Emit Socket để những user khác trong cùng board nhận được data
@@ -81,8 +86,20 @@ function Card({ card }) {
       }>
 
       {card?.cover && <CardMedia sx={{ height: 140 }} image={card.cover} title={card.title} />}
-      
-      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 }, display: 'flex', alignItems: 'flex-start' }}>
+
+      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        {/* Label badges (compact) */}
+        {card?.labelIds?.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.25 }}>
+            {card.labelIds.map(lid => {
+              const label = boardLabels.find(l => l.id === lid)
+              return label ? <LabelBadge key={lid} label={label} compact /> : null
+            })}
+          </Box>
+        )}
+
+        {/* Checkbox + Title row */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
         {/* Checkbox ẩn/hiện và đẩy text khi hover */}
         <Box
           className="card-checkbox"
@@ -100,7 +117,7 @@ function Card({ card }) {
           }}
           onClick={(e) => e.stopPropagation()} // Tránh bấm vào checkbox bị trigger luôn click của thẻ nếu cần
         >
-          <Checkbox 
+          <Checkbox
             checked={!!card.completed}
             onChange={handleToggleComplete}
             icon={<CheckCircleOutlineIcon />}
@@ -113,16 +130,29 @@ function Card({ card }) {
         <Typography sx={{ textDecoration: card.completed ? 'line-through' : 'none', mt: 0.2, wordBreak: 'break-word', transition: 'all 0.25s ease-in-out' }}>
           {card.title}
         </Typography>
+        </Box>
       </CardContent>
 
       {
         shouldShowCardAction() &&
-        <CardActions sx={{ p: '0 4px 8px 4px', display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {!!card.memberIds?.length && <Button startIcon={<GroupIcon />} size="small">{card.memberIds.length}</Button>}
-            {!!card.comments?.length && <Button startIcon={<CommentIcon />} size="small">{card.comments.length}</Button>}
-            {!!card.attachments?.length && <Button startIcon={<AttachmentIcon />} size="small">{card.attachments.length}</Button>}
-          </Box>
+        <CardActions sx={{ p: '0 4px 8px 4px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
+          {/* Badge ngày tháng ở hàng trên */}
+          {!!card.dueDate && (
+            <DateBadge card={card} showIcon={true} interactive={false} />
+          )}
+          
+          {/* Hàng dưới chứa các icon Comments, Attachments và Members */}
+          {(!!card.comments?.length || !!card.attachments?.length || !!card.memberIds?.length) && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {!!card.comments?.length && <Button startIcon={<CommentIcon />} size="small">{card.comments.length}</Button>}
+                {!!card.attachments?.length && <Button startIcon={<AttachmentIcon />} size="small">{card.attachments.length}</Button>}
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {!!card.memberIds?.length && <Button startIcon={<GroupIcon />} size="small">{card.memberIds.length}</Button>}
+              </Box>
+            </Box>
+          )}
         </CardActions>
       }
     </MuiCard>
