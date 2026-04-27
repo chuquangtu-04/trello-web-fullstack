@@ -40,7 +40,8 @@ import { selectCurrentUser } from '~/redux/user/userSlice'
 import CardAttachmentSection from './CardAttachmentSection'
 import LabelBadge from './Labels/LabelBadge'
 import LabelPicker from './Labels/LabelPicker'
-
+import DatePickerPopover from './Dates/DatePickerPopover'
+import DateBadge from './Dates/DateBadge'
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
@@ -79,9 +80,11 @@ function ActiveCard() {
   // State cho LabelPicker
   const [labelAnchorEl, setLabelAnchorEl] = useState(null)
   const isLabelPickerOpen = Boolean(labelAnchorEl)
-  // Không dùng biến State để check đóng mở modal nữa vì chúng ta sẽ check bên board|_id.jsx
-  // const [isOpen, setIsOpen] = useState(true)
-  // const handleOpenModal = () => setIsOpen(true)
+
+  // State cho DatePicker
+  const [dateAnchorEl, setDateAnchorEl] = useState(null)
+  const isDatePickerOpen = Boolean(dateAnchorEl)
+
   const handleCloseModal = () => {
     dispatch(clearAndHideCurrentActiveCard())
     // setIsOpen(false)
@@ -209,20 +212,64 @@ function ActiveCard() {
     try {
       const result = await updateLabelAPI(activeBoard._id, labelId, data)
       dispatch(updateLabelInBoard(result.labels))
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const onDeleteLabel = async (labelId) => {
     try {
       await deleteLabelAPI(activeBoard._id, labelId)
       dispatch(removeLabelFromBoard(labelId))
-      // Cũng update activeCard nếu nó đang có label đó
       if (activeCard?.labelIds?.includes(labelId)) {
         const updated = { ...activeCard, labelIds: activeCard.labelIds.filter(id => id !== labelId) }
         dispatch(updateCurrentActiveCard(updated))
         dispatch(updateCardInBoard(updated))
       }
-    } catch (err) {}
+    } catch (err) { }
+  }
+
+  // ============================================================
+  // Date handlers
+  // ============================================================
+  const handleOpenDatePicker = (e) => setDateAnchorEl(e.currentTarget)
+  const handleCloseDatePicker = () => setDateAnchorEl(null)
+
+  const onSaveDates = async (dateData) => {
+    const updatedCard = { ...activeCard, ...dateData }
+    dispatch(updateCurrentActiveCard(updatedCard))
+    dispatch(updateCardInBoard(updatedCard))
+    try {
+      await updateCardDetailAPI(activeCard._id, dateData)
+    } catch (err) {
+      dispatch(updateCurrentActiveCard(activeCard))
+      dispatch(updateCardInBoard(activeCard))
+    }
+    handleCloseDatePicker()
+  }
+
+  const onRemoveDates = async () => {
+    const dateData = { startDate: null, dueDate: null, dueTime: null, reminder: null, repeat: null, completed: false }
+    const updatedCard = { ...activeCard, ...dateData }
+    dispatch(updateCurrentActiveCard(updatedCard))
+    dispatch(updateCardInBoard(updatedCard))
+    try {
+      await updateCardDetailAPI(activeCard._id, dateData)
+    } catch (err) {
+      dispatch(updateCurrentActiveCard(activeCard))
+      dispatch(updateCardInBoard(activeCard))
+    }
+    handleCloseDatePicker()
+  }
+
+  const onToggleComplete = async () => {
+    const updatedCard = { ...activeCard, completed: !activeCard.completed }
+    dispatch(updateCurrentActiveCard(updatedCard))
+    dispatch(updateCardInBoard(updatedCard))
+    try {
+      await updateCardDetailAPI(activeCard._id, { completed: updatedCard.completed })
+    } catch (err) {
+      dispatch(updateCurrentActiveCard(activeCard))
+      dispatch(updateCardInBoard(activeCard))
+    }
   }
 
   return (
@@ -284,6 +331,19 @@ function ActiveCard() {
                 onUpdateCardMembers={onUpdateCardMembers}
               />
             </Box>
+
+            {/* Dates section */}
+            {activeCard?.dueDate && (
+              <Box sx={{ mb: 3 }}>
+                <Typography sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}>Due date</Typography>
+                <DateBadge
+                  card={activeCard}
+                  interactive
+                  onToggleComplete={onToggleComplete}
+                  onClick={handleOpenDatePicker}
+                />
+              </Box>
+            )}
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -384,18 +444,24 @@ function ActiveCard() {
                 onUpdateLabel={onUpdateLabel}
                 onDeleteLabel={onDeleteLabel}
               />
-              <SidebarItem><TaskAltOutlinedIcon fontSize="small" />Checklist</SidebarItem>
-              <SidebarItem><WatchLaterOutlinedIcon fontSize="small" />Dates</SidebarItem>
-              <SidebarItem><AutoFixHighOutlinedIcon fontSize="small" />Custom Fields</SidebarItem>
+              <SidebarItem className="active" onClick={handleOpenDatePicker}>
+                <WatchLaterOutlinedIcon fontSize="small" />
+                Dates
+              </SidebarItem>
+              <DatePickerPopover
+                anchorEl={dateAnchorEl}
+                isOpen={isDatePickerOpen}
+                onClose={handleCloseDatePicker}
+                card={activeCard}
+                onSave={onSaveDates}
+                onRemove={onRemoveDates}
+              />
             </Stack>
 
             <Divider sx={{ my: 2 }} />
 
             <Typography sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}>Power-Ups</Typography>
             <Stack direction="column" spacing={1}>
-              <SidebarItem><AspectRatioOutlinedIcon fontSize="small" />Card Size</SidebarItem>
-              <SidebarItem><AddToDriveOutlinedIcon fontSize="small" />Google Drive</SidebarItem>
-              <SidebarItem><AddOutlinedIcon fontSize="small" />Add Power-Ups</SidebarItem>
             </Stack>
 
             <Divider sx={{ my: 2 }} />
@@ -404,7 +470,7 @@ function ActiveCard() {
             <Stack direction="column" spacing={1}>
               <SidebarItem><ArrowForwardOutlinedIcon fontSize="small" />Move</SidebarItem>
               <SidebarItem><ContentCopyOutlinedIcon fontSize="small" />Copy</SidebarItem>
-              <SidebarItem><AutoAwesomeOutlinedIcon fontSize="small" />Make Template</SidebarItem>
+              {/* <SidebarItem><AutoAwesomeOutlinedIcon fontSize="small" />Make Template</SidebarItem> */}
               <SidebarItem><ArchiveOutlinedIcon fontSize="small" />Archive</SidebarItem>
               <SidebarItem><ShareOutlinedIcon fontSize="small" />Share</SidebarItem>
             </Stack>

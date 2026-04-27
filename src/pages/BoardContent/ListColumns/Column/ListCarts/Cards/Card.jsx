@@ -19,6 +19,7 @@ import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { updateCardDetailAPI } from '~/apis'
 import { socketIoInstance } from '~/socketClient'
 import LabelBadge from '~/components/Modal/ActiveCard/Labels/LabelBadge'
+import DateBadge from '~/components/Modal/ActiveCard/Dates/DateBadge'
 
 function Card({ card }) {
   const dispatch = useDispatch()
@@ -38,7 +39,7 @@ function Card({ card }) {
   }
 
   const shouldShowCardAction = () => {
-    return !!card.memberIds?.length || !!card.comments?.length || !!card.attachments?.length
+    return !!card.memberIds?.length || !!card.comments?.length || !!card.attachments?.length || !!card.dueDate
   }
 
   const setActiveCard = () => {
@@ -134,12 +135,24 @@ function Card({ card }) {
 
       {
         shouldShowCardAction() &&
-        <CardActions sx={{ p: '0 4px 8px 4px', display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {!!card.memberIds?.length && <Button startIcon={<GroupIcon />} size="small">{card.memberIds.length}</Button>}
-            {!!card.comments?.length && <Button startIcon={<CommentIcon />} size="small">{card.comments.length}</Button>}
-            {!!card.attachments?.length && <Button startIcon={<AttachmentIcon />} size="small">{card.attachments.length}</Button>}
-          </Box>
+        <CardActions sx={{ p: '0 4px 8px 4px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
+          {/* Badge ngày tháng ở hàng trên */}
+          {!!card.dueDate && (
+            <DateBadge card={card} showIcon={true} interactive={false} />
+          )}
+          
+          {/* Hàng dưới chứa các icon Comments, Attachments và Members */}
+          {(!!card.comments?.length || !!card.attachments?.length || !!card.memberIds?.length) && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {!!card.comments?.length && <Button startIcon={<CommentIcon />} size="small">{card.comments.length}</Button>}
+                {!!card.attachments?.length && <Button startIcon={<AttachmentIcon />} size="small">{card.attachments.length}</Button>}
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {!!card.memberIds?.length && <Button startIcon={<GroupIcon />} size="small">{card.memberIds.length}</Button>}
+              </Box>
+            </Box>
+          )}
         </CardActions>
       }
     </MuiCard>
