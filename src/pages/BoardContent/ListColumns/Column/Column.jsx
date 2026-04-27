@@ -23,7 +23,7 @@ import { useConfirm } from 'material-ui-confirm'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { createNewCardAPI, deleteColumnAPI, updateColumnDetailAPI, copyColumnAPI } from '~/apis'
+import { createNewCardAPI, deleteColumnAPI, updateColumnDetailAPI, copyColumnAPI, archiveAllCardsAPI } from '~/apis'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import ListCards from './ListCarts/ListCards'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
@@ -99,6 +99,32 @@ function Column({ column }) {
     } catch (error) {
       // lỗi được catch bởi interceptor
     }
+  }
+
+  const handleArchiveAllCards = async () => {
+    confirmDeleteColumn({
+      title: 'Archive all cards',
+      description: 'Are you sure you want to archive all cards in this column?',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
+    }).then(async () => {
+      try {
+        await archiveAllCardsAPI(column._id)
+        
+        // Optimistic update
+        const newBoard = cloneDeep(board)
+        const targetColumn = newBoard.columns.find(c => c._id === column._id)
+        if (targetColumn) {
+          targetColumn.cards = [generatePlaceholderCard(targetColumn)]
+          targetColumn.cardOrderIds = [targetColumn.cards[0]._id]
+        }
+        dispatch(updateCurrentActiveBoard(newBoard))
+        toast.success('Đã lưu trữ tất cả thẻ')
+        handleClose()
+      } catch (error) {
+        // error handled by interceptor
+      }
+    }).catch(() => {})
   }
 
   const addNewCard = async () => {
@@ -282,9 +308,9 @@ function Column({ column }) {
                 <ListItemIcon sx={{ ml: '-3px' }}><DeleteForeverIcon className='delete-forever-icon' fontSize="medium" /></ListItemIcon>
                 <ListItemText>Delete column</ListItemText>
               </MenuItem>
-              <MenuItem onClick={handleClose}>
+              <MenuItem onClick={handleArchiveAllCards}>
                 <ListItemIcon><Cloud fontSize="small" /></ListItemIcon>
-                <ListItemText>Delete all cards</ListItemText>
+                <ListItemText>Archive all cards</ListItemText>
               </MenuItem>
             </Menu>
 
