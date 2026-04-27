@@ -12,8 +12,8 @@ import { useConfirm } from 'material-ui-confirm'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { fetchBoardDetailsSoftColumnAPI, hardDeleteColumnAPI, restoreColumnsAPI } from '~/apis'
-import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { fetchBoardDetailsSoftColumnAPI, hardDeleteColumnAPI, restoreColumnsAPI, getArchivedCardsAPI, updateCardDetailAPI, deleteCardAPI } from '~/apis'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard, updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -34,6 +34,7 @@ function Archive() {
   // Lấy board trong redux
   const boardFromRedux = useSelector(selectCurrentActiveBoard)
   const [columnArchive, setColumnArchive] = useState([])
+  const [cardArchive, setCardArchive] = useState([])
   const [showArchive, setShowArchive] = useState(false)
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -46,6 +47,8 @@ function Archive() {
     const timeout = setTimeout(async () => {
       const board = await fetchBoardDetailsSoftColumnAPI(boardFromRedux._id)
       setColumnArchive(board.columns)
+      const archivedCards = await getArchivedCardsAPI(boardFromRedux._id)
+      setCardArchive(archivedCards)
     }, 200) // đợi backend cập nhật xong
 
     return () => clearTimeout(timeout)
@@ -130,6 +133,54 @@ function Archive() {
         () => {}
       )
   }
+
+  // Khôi phục card
+  const handleRestoreCard = async (card) => {
+    try {
+      // API call to restore card
+      const restoredCard = await updateCardDetailAPI(card._id, { isArchived: false, archivedAt: null })
+      
+      // Remove from archive list
+      setCardArchive(prev => prev.filter(c => c._id !== card._id))
+
+      // Update active board in Redux (Optimistic)
+      const newBoard = cloneDeep(boardFromRedux)
+      const columnToUpdate = newBoard.columns.find(col => col._id === restoredCard.columnId)
+      if (columnToUpdate) {
+        // Xóa placeholder card nếu có
+        if (columnToUpdate.cards.some(c => c.FE_placeholderCard)) {
+          columnToUpdate.cards = [restoredCard]
+          columnToUpdate.cardOrderIds = [restoredCard._id]
+        } else {
+          columnToUpdate.cards.push(restoredCard)
+          columnToUpdate.cardOrderIds.push(restoredCard._id)
+        }
+        dispatch(updateCurrentActiveBoard(newBoard))
+      }
+      toast.success('Đã khôi phục thẻ thành công')
+    } catch (error) {
+      // error handling via interceptor
+    }
+  }
+
+  // Xóa vĩnh viễn card
+  const confirmDeleteCard = useConfirm()
+  const handleDeleteCard = (cardId) => {
+    confirmDeleteCard({
+      title: 'Delete Card',
+      description: 'This action will delete the Card permanently you cannot restore it !',
+      confirmationText: 'Agree',
+      cancellationText: 'Cancel'
+    }).then(async () => {
+      try {
+        await deleteCardAPI(cardId)
+        setCardArchive(prev => prev.filter(c => c._id !== cardId))
+        toast.success('Đã xóa thẻ vĩnh viễn')
+      } catch (error) {
+        // error handling via interceptor
+      }
+    }).catch(() => {})
+  }
   return (
     <Box>
       <Button
@@ -179,7 +230,61 @@ function Archive() {
               }
             </Box>
             {
-              showArchive ? 'Card lưu trữ ở đây' :
+              showArchive ? 
+                <Box sx={{ maxHeight: '300px', overflowX: 'auto', pr: '7px' }}>
+                  {
+                    cardArchive.length === 0 &&
+                    <Box sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: '#091e420f',
+                      mt: '14px',
+                      minHeight: '68px',
+                      borderRadius: '8px'
+                    }}>
+                    Không có thẻ nào
+                    </Box> 
+                  }
+                  {
+                    cardArchive.map((card, index) => (
+                      <Box sx={{ mt: '14px', minHeight: '68px' }} key={index} >
+                        <Box sx={{ display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          boxShadow: '0px 1px 0px 0px #091e4224',
+                          pb: '12px',
+                          pt: '12px'
+                        }}>
+                          {card.title}
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Button
+                              onClick={() => handleRestoreCard(card)}
+                              startIcon={<RestartAltIcon/>}
+                              sx={{ mr: '6px' }}
+                              variant="contained"
+                            >Khôi Phục</Button>
+                            <Box
+                              onClick={() => handleDeleteCard(card._id)}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '37px',
+                                width: '37px',
+                                borderRadius: '6px',
+                                backgroundColor: '#091e420f',
+                                '&:hover': { backgroundColor: '#091e4224' }
+                              }}>
+                              <DeleteSweepIcon fontSize="small" sx={ { cursor: 'pointer', color: '#44546f' }}/>
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ))
+                  }
+                </Box>
+              :
                 <Box sx={{ maxHeight: '300px', overflowX: 'auto', pr: '7px' }}>
                   {
                     columnArchive.length === 0 &&

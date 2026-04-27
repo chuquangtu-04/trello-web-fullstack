@@ -147,3 +147,20 @@ export const copyColumnAPI = async (columnId, data) => {
   const response = await post(`columns/copy/${columnId}`, data)
   return response.data
 }
+
+/** Archive / Restore Cards */
+export const archiveAllCardsAPI = async (columnId) => {
+  const response = await patch(`columns/${columnId}/archive-cards`)
+  return response.data
+}
+
+export const getArchivedCardsAPI = async (boardId) => {
+  const response = await get(`boards/${boardId}/archived-cards`)
+  return response.data
+}
+
+export const deleteCardAPI = async (cardId) => {
+  const response = await deleted(`cards/${cardId}`)
+  return response.data
+}
+
