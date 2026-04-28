@@ -76,11 +76,21 @@ function Board() {
       }
     }
 
+    // Nếu background là ảnh (bắt đầu bằng http hoặc blob hoặc /)
+    const isImage = board.background.startsWith('http') || board.background.startsWith('blob') || board.background.startsWith('/')
+
+    if (isImage) {
+      return {
+        backgroundImage: `url(${board.background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }
+    }
+
+    // Ngược lại nếu là màu hoặc gradient
     return {
-      backgroundImage: `url(${board.background})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
+      background: board.background
     }
   }, [board?.background])
 
