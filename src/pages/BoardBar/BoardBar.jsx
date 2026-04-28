@@ -2,14 +2,16 @@ import BoltIcon from '@mui/icons-material/Bolt'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import VpnLockIcon from '@mui/icons-material/VpnLock'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { Tooltip } from '@mui/material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import { capitalizeFirstLetter } from '~/utils/formatters'
-import Archive from './Archive'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
 import FilterPanel from './FilterPanel'
+import BoardMenuModal from './BoardMenuModal'
+import ArchivedItemsModal from './ArchivedItemsModal'
 import { useState, useEffect } from 'react'
 import Badge from '@mui/material/Badge'
 import TextField from '@mui/material/TextField'
@@ -35,24 +37,51 @@ const MENU_STYLE = {
 function BoardBar({ board }) {
   const dispatch = useDispatch()
   const filters = useSelector(selectFilters)
+  
+  // State quản lý Filter Popover
   const [filterAnchorEl, setFilterAnchorEl] = useState(null)
   const isOpenFilter = Boolean(filterAnchorEl)
+
+  // State quản lý Board Menu và Archived Popovers
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null)
+  const [showBoardMenu, setShowBoardMenu] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
 
   // State phục vụ cho việc đổi tên board
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleValue, setTitleValue] = useState(board?.title || '')
 
-  // Mỗi khi board thay đổi từ bên ngoài (ví dụ chuyển board) thì cập nhật lại titleValue
   useEffect(() => {
     if (board?.title) setTitleValue(board.title)
   }, [board?.title])
 
-  const handleOpenFilter = (event) => {
-    setFilterAnchorEl(event.currentTarget)
+  const handleOpenFilter = (event) => setFilterAnchorEl(event.currentTarget)
+  const handleCloseFilter = () => setFilterAnchorEl(null)
+
+  const handleOpenBoardMenu = (event) => {
+    setMenuAnchorEl(event.currentTarget)
+    setShowBoardMenu(true)
   }
 
-  const handleCloseFilter = () => {
-    setFilterAnchorEl(null)
+  const handleCloseBoardMenu = () => {
+    setMenuAnchorEl(null)
+    setShowBoardMenu(false)
+  }
+
+  const handleOpenArchived = () => {
+    setShowBoardMenu(false)
+    setShowArchived(true)
+    // Giữ nguyên menuAnchorEl để làm anchor cho Archived Popover
+  }
+
+  const handleCloseArchived = () => {
+    setMenuAnchorEl(null)
+    setShowArchived(false)
+  }
+
+  const handleBackToMenu = () => {
+    setShowArchived(false)
+    setShowBoardMenu(true)
   }
 
   const handleUpdateBoardTitle = () => {
@@ -63,21 +92,14 @@ function BoardBar({ board }) {
       return
     }
 
-    // Optimistic Update UI
     const updatedBoard = { ...board, title: trimmedTitle }
     dispatch(updateCurrentActiveBoard(updatedBoard))
 
-    // Gọi API cập nhật vào DB
     updateBoardDetailsAPI(board._id, { title: trimmedTitle })
-      .then(() => {
-        toast.success('Đã cập nhật tên Board thành công')
-      })
-      .finally(() => {
-        setIsEditingTitle(false)
-      })
+      .then(() => toast.success('Đã cập nhật tên Board thành công'))
+      .finally(() => setIsEditingTitle(false))
   }
 
-  // Đếm số lượng filter đang active để hiện badge
   const activeFilterCount = (filters.keyword ? 1 : 0) + filters.memberIds.length + filters.status.length
 
   return (
@@ -94,13 +116,7 @@ function BoardBar({ board }) {
       backdropFilter: 'blur(2px)',
       paddingX: 2
     }}>
-      <Box sx={
-        { display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          '& .MuiButtonBase-root' : { backgroundColor: 'transparent' }
-        }
-      }>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, '& .MuiButtonBase-root': { backgroundColor: 'transparent' } }}>
         <Tooltip title={board?.description}>
           {isEditingTitle ? (
             <TextField
@@ -118,67 +134,56 @@ function BoardBar({ board }) {
               autoFocus
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',
-                  borderRadius: '4px',
-                  height: '32px',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  '& fieldset': { border: 'none' }
+                  backgroundColor: 'white', borderRadius: '4px', height: '32px', fontWeight: 'bold', fontSize: '14px', '& fieldset': { border: 'none' }
                 },
-                '& .MuiOutlinedInput-input': {
-                  padding: '4px 8px',
-                  color: 'primary.main'
-                }
+                '& .MuiOutlinedInput-input': { padding: '4px 8px', color: 'primary.main' }
               }}
             />
           ) : (
             <Chip
-              sx={{
-                ...MENU_STYLE,
-                paddingX: '10px',
-                '& .MuiChip-label': { fontWeight: 'bold', fontSize: '14px' }
-              }}
+              sx={{ ...MENU_STYLE, paddingX: '10px', '& .MuiChip-label': { fontWeight: 'bold', fontSize: '14px' } }}
               icon={<DashboardIcon />}
               label={board?.title}
               onClick={() => setIsEditingTitle(true)}
             />
           )}
         </Tooltip>
+        
         <Tooltip title={board?.type}>
-          <Chip
-            sx={MENU_STYLE}
-            icon={<VpnLockIcon />}
-            label={capitalizeFirstLetter(board?.type)}
-            onClick={() => {}}
-          />
+          <Chip sx={MENU_STYLE} icon={<VpnLockIcon />} label={capitalizeFirstLetter(board?.type)} onClick={() => { }} />
         </Tooltip>
-        <Chip
-          sx={MENU_STYLE}
-          icon={<BoltIcon />}
-          label="Automatic"
-          onClick={() => {}}
-        />
+
+        <Chip sx={MENU_STYLE} icon={<BoltIcon />} label="Automatic" onClick={() => { }} />
+
         <Badge color="error" variant="dot" invisible={activeFilterCount === 0}>
-          <Chip
-            sx={MENU_STYLE}
-            icon={<FilterListIcon />}
-            label="Filters"
-            onClick={handleOpenFilter}
-          />
+          <Chip sx={MENU_STYLE} icon={<FilterListIcon />} label="Filters" onClick={handleOpenFilter} />
         </Badge>
-        <FilterPanel 
-          anchorEl={filterAnchorEl} 
-          isOpen={isOpenFilter} 
-          onClose={handleCloseFilter} 
+        <FilterPanel anchorEl={filterAnchorEl} isOpen={isOpenFilter} onClose={handleCloseFilter} />
+
+        <Chip 
+          sx={{ ...MENU_STYLE, minWidth: '40px', '& .MuiChip-label': { display: 'none' } }} 
+          icon={<MoreHorizIcon />} 
+          onClick={handleOpenBoardMenu} 
         />
-        <Archive/>
+
+        {/* Popovers */}
+        <BoardMenuModal 
+          isOpen={showBoardMenu} 
+          anchorEl={menuAnchorEl}
+          onClose={handleCloseBoardMenu} 
+          onOpenArchived={handleOpenArchived}
+        />
+        <ArchivedItemsModal 
+          isOpen={showArchived} 
+          anchorEl={menuAnchorEl}
+          onClose={handleCloseArchived} 
+          onBack={handleBackToMenu}
+        />
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        {/* Xử lý mời user vào làm thành viên của board */}
-        <InviteBoardUser boardId={board._id}/>
-        {/* Xử lý hiện thị danh sách thành viên của board */}
-        <BoardUserGroup boardUsers={board?.FE_allUsers}/>
+        <InviteBoardUser boardId={board._id} />
+        <BoardUserGroup boardUsers={board?.FE_allUsers} />
       </Box>
     </Box>
   )

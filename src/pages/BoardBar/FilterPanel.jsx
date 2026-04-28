@@ -103,7 +103,7 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
     >
       <Box sx={{ p: 2, width: 300 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Lọc</Typography>
-        
+
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>Từ khóa</Typography>
           <TextField
@@ -114,7 +114,7 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
             onChange={handleKeywordChange}
           />
         </Box>
-        
+
         <Divider sx={{ my: 2 }} />
 
         <Box sx={{ mb: 2 }}>
@@ -194,7 +194,7 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
                 onToggle={handleLabelChange}
               />
             ))}
-            
+
             {board?.labels?.length > 3 && (
               <>
                 <Button
