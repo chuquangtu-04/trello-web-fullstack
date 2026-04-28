@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
 import Typography from '@mui/material/Typography'
@@ -45,10 +46,10 @@ import DateBadge from './Dates/DateBadge'
 import { useConfirm } from 'material-ui-confirm'
 import MoveCardModal from './MoveCardModal'
 import CopyCardModal from './CopyCardModal'
+import { socketIoInstance } from '~/socketClient'
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
-import { useState } from 'react'
 import { archiveCardAPI, moveCardAPI, copyCardAPI } from '~/apis'
 import { removeCardFromBoard, moveCardInBoard, addCardToBoard } from '~/redux/activeBoard/activeBoardSlice'
 const SidebarItem = styled(Box)(({ theme }) => ({
@@ -98,10 +99,59 @@ function ActiveCard() {
   const [copyAnchorEl, setCopyAnchorEl] = useState(null)
   const isCopyModalOpen = Boolean(copyAnchorEl)
 
+  // State xử lý typing realtime
+  const [typingUser, setTypingUser] = useState(null)
+
   const handleCloseModal = () => {
+    // Leave room socket khi đóng modal
+    if (activeCard) {
+      socketIoInstance.emit('FE_USER_LEFT_CARD', activeCard._id)
+    }
     dispatch(clearAndHideCurrentActiveCard())
     // setIsOpen(false)
   }
+
+  // Effect xử lý Socket Realtime
+  useEffect(() => {
+    if (activeCard) {
+      // Join room theo cardId
+      socketIoInstance.emit('FE_USER_JOINED_CARD', activeCard._id)
+
+      // Lắng nghe sự kiện có comment mới
+      const onNewComment = (data) => {
+        // Chỉ xử lý nếu đúng card đang mở (dù đã join room nhưng check lại cho chắc)
+        if (data.cardId === activeCard._id) {
+          // Tránh duplicate comment cho chính người gửi (vì người gửi đã nhận data từ API response)
+          const isOwner = data.comment.userId === currentUser._id
+          if (!isOwner) {
+            const updatedCard = {
+              ...activeCard,
+              comments: [data.comment, ...activeCard.comments]
+            }
+            dispatch(updateCurrentActiveCard(updatedCard))
+          }
+        }
+      }
+
+      // Lắng nghe sự kiện typing
+      const onUserTyping = (data) => {
+        if (data.cardId === activeCard._id) setTypingUser(data.userDisplayName)
+      }
+      const onUserStoppedTyping = (data) => {
+        if (data.cardId === activeCard._id) setTypingUser(null)
+      }
+
+      socketIoInstance.on('BE_USER_ADDED_COMMENT', onNewComment)
+      socketIoInstance.on('BE_USER_TYPING_COMMENT', onUserTyping)
+      socketIoInstance.on('BE_USER_STOPPED_TYPING_COMMENT', onUserStoppedTyping)
+
+      return () => {
+        socketIoInstance.off('BE_USER_ADDED_COMMENT', onNewComment)
+        socketIoInstance.off('BE_USER_TYPING_COMMENT', onUserTyping)
+        socketIoInstance.off('BE_USER_STOPPED_TYPING_COMMENT', onUserStoppedTyping)
+      }
+    }
+  }, [activeCard?._id, currentUser._id])
 
   // Func dùng chung cho các trường hợp update card title, description, cover, comment...
   const callApiUpdateCard = async (updateData) => {
@@ -475,8 +525,10 @@ function ActiveCard() {
 
               {/* Feature 04: Xử lý các hành động, ví dụ comment vào Card */}
               <CardActivitySection
+                cardId={activeCard?._id}
                 cardComments={activeCard?.comments}
                 OnAddCardComment={OnAddCardComment}
+                typingUser={typingUser}
               />
             </Box>
           </Grid>
