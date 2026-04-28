@@ -104,6 +104,21 @@ export const activeBoardSlice = createSlice({
           })
         })
       }
+    },
+    removeCardFromBoard: (state, action) => {
+      const { cardId, columnId } = action.payload
+      const column = state.currentActiveBoard.columns.find(col => col._id === columnId)
+      if (column) {
+        column.cards = column.cards.filter(card => card._id !== cardId)
+        column.cardOrderIds = column.cardOrderIds.filter(id => id !== cardId)
+        
+        // Nếu column rỗng sau khi xóa, cần tạo placeholder card
+        if (isEmpty(column.cards)) {
+          const placeholderCard = generatePlaceholderCard(column)
+          column.cards = [placeholderCard]
+          column.cardOrderIds = [placeholderCard._id]
+        }
+      }
     }
   },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
@@ -136,7 +151,7 @@ export const activeBoardSlice = createSlice({
 
 // Actions: Là nơi dành cho các components bên dưới gọi bằng dispatch() tới nó để cập nhật lại dữ liệu thông qua reducer (chạy đồng bộ)
 // Để ý ở trên thì không thấy properties actions đâu cả, bởi vì những cái actions này đơn giản là được thằng redux tạo tự động theo tên của reducer nhé.
-export const { updateCurrentActiveBoard, updateCardInBoard, setBoardCreationDraft, updateFilters, addLabelToBoard, updateLabelInBoard, removeLabelFromBoard } = activeBoardSlice.actions
+export const { updateCurrentActiveBoard, updateCardInBoard, setBoardCreationDraft, updateFilters, addLabelToBoard, updateLabelInBoard, removeLabelFromBoard, removeCardFromBoard } = activeBoardSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentActiveBoard = (state) => {

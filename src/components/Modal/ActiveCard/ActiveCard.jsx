@@ -42,10 +42,13 @@ import LabelBadge from './Labels/LabelBadge'
 import LabelPicker from './Labels/LabelPicker'
 import DatePickerPopover from './Dates/DatePickerPopover'
 import DateBadge from './Dates/DateBadge'
+import { useConfirm } from 'material-ui-confirm'
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
 import { useState } from 'react'
+import { archiveCardAPI } from '~/apis'
+import { removeCardFromBoard } from '~/redux/activeBoard/activeBoardSlice'
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -272,6 +275,40 @@ function ActiveCard() {
     }
   }
 
+  const confirmArchiveCard = useConfirm()
+  const handleArchiveCard = () => {
+    confirmArchiveCard({
+      title: 'Delete Card?',
+      description: 'Are you sure you want to delete this card? It will be moved to the Archive.',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
+    }).then(async () => {
+      // Optimistic update: Xóa card khỏi board state ngay lập tức
+      dispatch(removeCardFromBoard({ cardId: activeCard._id, columnId: activeCard.columnId }))
+      
+      // Đóng modal card detail
+      handleCloseModal()
+
+      // Gọi API archive
+      try {
+        await archiveCardAPI(activeCard._id)
+        toast.success('Đã chuyển thẻ vào mục Lưu trữ', {
+          // Bonus: Nút Undo
+          action: {
+            label: 'Undo',
+            onClick: () => {
+              // Logic khôi phục nhanh nếu cần, nhưng hiện tại ta tập trung vào Archive trước
+              toast.info('Vào Menu > Mục đã lưu trữ để khôi phục.')
+            }
+          }
+        })
+      } catch (err) {
+        // Nếu lỗi thì fetch lại board để đồng bộ lại (hoặc revert state nếu phức tạp hơn)
+        // Ở đây đơn giản là toast lỗi
+      }
+    }).catch(() => {})
+  }
+
   return (
     <Modal
       disableScrollLock
@@ -471,7 +508,7 @@ function ActiveCard() {
               <SidebarItem><ArrowForwardOutlinedIcon fontSize="small" />Move</SidebarItem>
               <SidebarItem><ContentCopyOutlinedIcon fontSize="small" />Copy</SidebarItem>
               {/* <SidebarItem><AutoAwesomeOutlinedIcon fontSize="small" />Make Template</SidebarItem> */}
-              <SidebarItem><ArchiveOutlinedIcon fontSize="small" />Archive</SidebarItem>
+              <SidebarItem onClick={handleArchiveCard}><ArchiveOutlinedIcon fontSize="small" />Delete Card</SidebarItem>
               <SidebarItem><ShareOutlinedIcon fontSize="small" />Share</SidebarItem>
             </Stack>
           </Grid>

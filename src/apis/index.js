@@ -159,6 +159,11 @@ export const getArchivedCardsAPI = async (boardId) => {
   return response.data
 }
 
+export const archiveCardAPI = async (cardId) => {
+  const response = await patch(`cards/${cardId}/archive`)
+  return response.data
+}
+
 export const deleteCardAPI = async (cardId) => {
   const response = await deleted(`cards/${cardId}`)
   return response.data
