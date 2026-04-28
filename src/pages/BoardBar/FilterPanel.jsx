@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentActiveBoard, selectFilters, updateFilters } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { filterCards } from '~/utils/filterCards'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
 
 function FilterPanel({ anchorEl, isOpen, onClose }) {
   const dispatch = useDispatch()
@@ -37,8 +38,15 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
     dispatch(updateFilters({ ...filters, status: newStatus }))
   }
 
+  const handleDueDateChange = (filterKey) => {
+    const newDueDateFilters = filters.dueDateFilters.includes(filterKey)
+      ? filters.dueDateFilters.filter(f => f !== filterKey)
+      : [...filters.dueDateFilters, filterKey]
+    dispatch(updateFilters({ ...filters, dueDateFilters: newDueDateFilters }))
+  }
+
   const clearFilters = () => {
-    dispatch(updateFilters({ keyword: '', memberIds: [], status: [] }))
+    dispatch(updateFilters({ keyword: '', memberIds: [], status: [], dueDateFilters: [] }))
   }
 
   // Calculate matching cards count
@@ -129,6 +137,84 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
                 />
               }
               label={<Typography variant="body2">Không được đánh dấu là đã hoàn thành</Typography>}
+            />
+          </FormGroup>
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>Ngày hết hạn</Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.dueDateFilters.includes('noDueDate')}
+                  onChange={() => handleDueDateChange('noDueDate')}
+                  size="small"
+                />
+              }
+              label={<Typography variant="body2">Không có ngày hết hạn</Typography>}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.dueDateFilters.includes('overdue')}
+                  onChange={() => handleDueDateChange('overdue')}
+                  size="small"
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon sx={{ color: '#eb5a46', fontSize: '18px' }} />
+                  <Typography variant="body2">Quá hạn</Typography>
+                </Box>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.dueDateFilters.includes('tomorrow')}
+                  onChange={() => handleDueDateChange('tomorrow')}
+                  size="small"
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon sx={{ color: '#f2d600', fontSize: '18px' }} />
+                  <Typography variant="body2">Sẽ hết hạn vào ngày mai</Typography>
+                </Box>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.dueDateFilters.includes('nextWeek')}
+                  onChange={() => handleDueDateChange('nextWeek')}
+                  size="small"
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon sx={{ color: '#97a0af', fontSize: '18px' }} />
+                  <Typography variant="body2">Sẽ hết hạn vào tuần sau</Typography>
+                </Box>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.dueDateFilters.includes('nextMonth')}
+                  onChange={() => handleDueDateChange('nextMonth')}
+                  size="small"
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon sx={{ color: '#97a0af', fontSize: '18px' }} />
+                  <Typography variant="body2">Sẽ hết hạn vào tháng sau</Typography>
+                </Box>
+              }
             />
           </FormGroup>
         </Box>
