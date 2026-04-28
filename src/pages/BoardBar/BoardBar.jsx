@@ -10,10 +10,13 @@ import Archive from './Archive'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
 import FilterPanel from './FilterPanel'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Badge from '@mui/material/Badge'
-import { useSelector } from 'react-redux'
-import { selectFilters } from '~/redux/activeBoard/activeBoardSlice'
+import TextField from '@mui/material/TextField'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectFilters, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { updateBoardDetailsAPI } from '~/apis'
+import { toast } from 'react-toastify'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -26,11 +29,23 @@ const MENU_STYLE = {
   },
   '&:hover': {
     backgroundColor: 'primary.50'
-  } }
+  }
+}
+
 function BoardBar({ board }) {
-  const [filterAnchorEl, setFilterAnchorEl] = useState(null)
+  const dispatch = useDispatch()
   const filters = useSelector(selectFilters)
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null)
   const isOpenFilter = Boolean(filterAnchorEl)
+
+  // State phục vụ cho việc đổi tên board
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [titleValue, setTitleValue] = useState(board?.title || '')
+
+  // Mỗi khi board thay đổi từ bên ngoài (ví dụ chuyển board) thì cập nhật lại titleValue
+  useEffect(() => {
+    if (board?.title) setTitleValue(board.title)
+  }, [board?.title])
 
   const handleOpenFilter = (event) => {
     setFilterAnchorEl(event.currentTarget)
@@ -38,6 +53,28 @@ function BoardBar({ board }) {
 
   const handleCloseFilter = () => {
     setFilterAnchorEl(null)
+  }
+
+  const handleUpdateBoardTitle = () => {
+    const trimmedTitle = titleValue.trim()
+    if (!trimmedTitle || trimmedTitle === board?.title) {
+      setTitleValue(board?.title || '')
+      setIsEditingTitle(false)
+      return
+    }
+
+    // Optimistic Update UI
+    const updatedBoard = { ...board, title: trimmedTitle }
+    dispatch(updateCurrentActiveBoard(updatedBoard))
+
+    // Gọi API cập nhật vào DB
+    updateBoardDetailsAPI(board._id, { title: trimmedTitle })
+      .then(() => {
+        toast.success('Đã cập nhật tên Board thành công')
+      })
+      .finally(() => {
+        setIsEditingTitle(false)
+      })
   }
 
   // Đếm số lượng filter đang active để hiện badge
@@ -65,12 +102,47 @@ function BoardBar({ board }) {
         }
       }>
         <Tooltip title={board?.description}>
-          <Chip
-            sx={MENU_STYLE}
-            icon={<DashboardIcon />}
-            label={board?.title}
-            onClick={() => {}}
-          />
+          {isEditingTitle ? (
+            <TextField
+              size="small"
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              onBlur={handleUpdateBoardTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleUpdateBoardTitle()
+                if (e.key === 'Escape') {
+                  setTitleValue(board?.title || '')
+                  setIsEditingTitle(false)
+                }
+              }}
+              autoFocus
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'white',
+                  borderRadius: '4px',
+                  height: '32px',
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  '& fieldset': { border: 'none' }
+                },
+                '& .MuiOutlinedInput-input': {
+                  padding: '4px 8px',
+                  color: 'primary.main'
+                }
+              }}
+            />
+          ) : (
+            <Chip
+              sx={{
+                ...MENU_STYLE,
+                paddingX: '10px',
+                '& .MuiChip-label': { fontWeight: 'bold', fontSize: '14px' }
+              }}
+              icon={<DashboardIcon />}
+              label={board?.title}
+              onClick={() => setIsEditingTitle(true)}
+            />
+          )}
         </Tooltip>
         <Tooltip title={board?.type}>
           <Chip

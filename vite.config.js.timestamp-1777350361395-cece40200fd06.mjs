@@ -1,0 +1,25 @@
+// vite.config.js
+import { defineConfig } from "file:///D:/Project/trello-web-fullstack/node_modules/vite/dist/node/index.js";
+import react from "file:///D:/Project/trello-web-fullstack/node_modules/@vitejs/plugin-react-swc/index.mjs";
+import svgr from "file:///D:/Project/trello-web-fullstack/node_modules/vite-plugin-svgr/dist/index.js";
+var vite_config_default = defineConfig({
+  // https://github.com/vitejs/vite/issues/1973
+  // Cho phép thằng vite sử dụng được process.evn, mặc định thì không mà sẽ dùng import.meta.env
+  define: {
+    "process.env": process.env
+  },
+  plugins: [
+    react(),
+    svgr()
+  ],
+  base: "/",
+  resolve: {
+    alias: [
+      { find: "~", replacement: "/src" }
+    ]
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcuanMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCJEOlxcXFxQcm9qZWN0XFxcXHRyZWxsby13ZWItZnVsbHN0YWNrXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCJEOlxcXFxQcm9qZWN0XFxcXHRyZWxsby13ZWItZnVsbHN0YWNrXFxcXHZpdGUuY29uZmlnLmpzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9EOi9Qcm9qZWN0L3RyZWxsby13ZWItZnVsbHN0YWNrL3ZpdGUuY29uZmlnLmpzXCI7aW1wb3J0IHsgZGVmaW5lQ29uZmlnIH0gZnJvbSAndml0ZSdcclxuaW1wb3J0IHJlYWN0IGZyb20gJ0B2aXRlanMvcGx1Z2luLXJlYWN0LXN3YydcclxuaW1wb3J0IHN2Z3IgZnJvbSAndml0ZS1wbHVnaW4tc3ZncidcclxuXHJcblxyXG4vLyBodHRwczovL3ZpdGVqcy5kZXYvY29uZmlnL1xyXG5leHBvcnQgZGVmYXVsdCBkZWZpbmVDb25maWcoe1xyXG4gIC8vIGh0dHBzOi8vZ2l0aHViLmNvbS92aXRlanMvdml0ZS9pc3N1ZXMvMTk3M1xyXG4gIC8vIENobyBwaFx1MDBFOXAgdGhcdTFFQjFuZyB2aXRlIHNcdTFFRUQgZFx1MUVFNW5nIFx1MDExMVx1MDFCMFx1MUVFM2MgcHJvY2Vzcy5ldm4sIG1cdTFFQjdjIFx1MDExMVx1MUVDQm5oIHRoXHUwMEVDIGtoXHUwMEY0bmcgbVx1MDBFMCBzXHUxRUJEIGRcdTAwRjluZyBpbXBvcnQubWV0YS5lbnZcclxuICBkZWZpbmU6IHtcclxuICAgICdwcm9jZXNzLmVudic6IHByb2Nlc3MuZW52XHJcbiAgfSxcclxuICBwbHVnaW5zOiBbXHJcbiAgICByZWFjdCgpLFxyXG4gICAgc3ZncigpXHJcbiAgXSxcclxuICBiYXNlOiAnLycsXHJcbiAgcmVzb2x2ZToge1xyXG4gICAgYWxpYXM6IFtcclxuICAgICAgeyBmaW5kOiAnficsIHJlcGxhY2VtZW50OiAnL3NyYycgfVxyXG4gICAgXVxyXG4gIH1cclxufSlcclxuIl0sCiAgIm1hcHBpbmdzIjogIjtBQUFxUixTQUFTLG9CQUFvQjtBQUNsVCxPQUFPLFdBQVc7QUFDbEIsT0FBTyxVQUFVO0FBSWpCLElBQU8sc0JBQVEsYUFBYTtBQUFBO0FBQUE7QUFBQSxFQUcxQixRQUFRO0FBQUEsSUFDTixlQUFlLFFBQVE7QUFBQSxFQUN6QjtBQUFBLEVBQ0EsU0FBUztBQUFBLElBQ1AsTUFBTTtBQUFBLElBQ04sS0FBSztBQUFBLEVBQ1A7QUFBQSxFQUNBLE1BQU07QUFBQSxFQUNOLFNBQVM7QUFBQSxJQUNQLE9BQU87QUFBQSxNQUNMLEVBQUUsTUFBTSxLQUFLLGFBQWEsT0FBTztBQUFBLElBQ25DO0FBQUEsRUFDRjtBQUNGLENBQUM7IiwKICAibmFtZXMiOiBbXQp9Cg==

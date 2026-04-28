@@ -36,6 +36,7 @@ function Archive() {
   const [columnArchive, setColumnArchive] = useState([])
   const [cardArchive, setCardArchive] = useState([])
   const [showArchive, setShowArchive] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const [anchorEl, setAnchorEl] = useState(null)
   const toggleOpenShowArchive = () => (setShowArchive(!showArchive))
@@ -181,6 +182,10 @@ function Archive() {
       }
     }).catch(() => {})
   }
+
+  // Lọc danh sách theo searchQuery
+  const filteredCards = cardArchive.filter(card => card.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredColumns = columnArchive.filter(column => column.title.toLowerCase().includes(searchQuery.toLowerCase()))
   return (
     <Box>
       <Button
@@ -222,7 +227,15 @@ function Archive() {
               <CloseIcon fontSize='small' sx={{ cursor: 'pointer', borderRadius: '6px', '&:hover': { backgroundColor: '#091e4224' } }} onClick={handleClose}/>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: '12px', mb: '20px' }}>
-              <TextField sx={{ mr: '10px', flex: 1, '& .MuiOutlinedInput-root:hover fieldset': { borderColor: '#1976b6' } }} size='small' id="outlined-search" placeholder='Tìm kiếm lưu trữ...' type="search" />
+              <TextField
+                sx={{ mr: '10px', flex: 1, '& .MuiOutlinedInput-root:hover fieldset': { borderColor: '#1976b6' } }}
+                size='small'
+                id="outlined-search"
+                placeholder='Tìm kiếm lưu trữ...'
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
               {
                 showArchive ?
                   <Button variant="contained" onClick={toggleOpenShowArchive}>Card are stored</Button> :
@@ -247,7 +260,7 @@ function Archive() {
                     </Box> 
                   }
                   {
-                    cardArchive.map((card, index) => (
+                    filteredCards.map((card, index) => (
                       <Box sx={{ mt: '14px', minHeight: '68px' }} key={index} >
                         <Box sx={{ display: 'flex',
                           alignItems: 'center',
@@ -300,7 +313,7 @@ function Archive() {
                     Không có thẻ nào
                     </Box> }
                   {
-                    columnArchive.map((column, index) => (
+                    filteredColumns.map((column, index) => (
                       <Box sx={{ mt: '14px', minHeight: '68px' }} key={index} >
                         <Box sx={{ display: 'flex',
                           alignItems: 'center',
