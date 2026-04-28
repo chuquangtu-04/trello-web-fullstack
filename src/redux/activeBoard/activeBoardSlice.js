@@ -13,7 +13,8 @@ const initialState = {
     keyword: '',
     memberIds: [],
     status: [],
-    dueDateFilters: []
+    dueDateFilters: [],
+    labelIds: []
   }
 }
 
