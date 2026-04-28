@@ -12,7 +12,8 @@ const initialState = {
   filters: {
     keyword: '',
     memberIds: [],
-    status: []
+    status: [],
+    dueDateFilters: []
   }
 }
 

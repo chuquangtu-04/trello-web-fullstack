@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const filterCards = (cards, filters, currentUser) => {
   if (!filters) return cards
 
@@ -43,6 +45,40 @@ export const filterCards = (cards, filters, currentUser) => {
         statusMatch = statusMatch || !card.completed
       }
       isMatch = isMatch && statusMatch
+    }
+
+    // 4. Lọc theo Ngày hết hạn (dueDateFilters)
+    if (filters.dueDateFilters?.length > 0) {
+      let dateMatch = false
+      const now = moment()
+
+      if (filters.dueDateFilters.includes('noDueDate')) {
+        dateMatch = dateMatch || !card.dueDate
+      }
+
+      if (card.dueDate) {
+        const dueDate = moment(card.dueDate)
+
+        if (filters.dueDateFilters.includes('overdue')) {
+          dateMatch = dateMatch || (dueDate.isBefore(now) && !card.completed)
+        }
+        if (filters.dueDateFilters.includes('tomorrow')) {
+          const startOfTomorrow = moment().add(1, 'day').startOf('day')
+          const endOfTomorrow = moment().add(1, 'day').endOf('day')
+          dateMatch = dateMatch || dueDate.isBetween(startOfTomorrow, endOfTomorrow, null, '[]')
+        }
+        if (filters.dueDateFilters.includes('nextWeek')) {
+          const startOfNextWeek = moment().add(1, 'week').startOf('week')
+          const endOfNextWeek = moment().add(1, 'week').endOf('week')
+          dateMatch = dateMatch || dueDate.isBetween(startOfNextWeek, endOfNextWeek, null, '[]')
+        }
+        if (filters.dueDateFilters.includes('nextMonth')) {
+          const startOfNextMonth = moment().add(1, 'month').startOf('month')
+          const endOfNextMonth = moment().add(1, 'month').endOf('month')
+          dateMatch = dateMatch || dueDate.isBetween(startOfNextMonth, endOfNextMonth, null, '[]')
+        }
+      }
+      isMatch = isMatch && dateMatch
     }
 
     return isMatch
