@@ -81,6 +81,21 @@ export const filterCards = (cards, filters, currentUser) => {
       isMatch = isMatch && dateMatch
     }
 
+    // 5. Lọc theo Nhãn (labelIds)
+    if (filters.labelIds?.length > 0) {
+      let labelMatch = false
+      if (filters.labelIds.includes('no-label')) {
+        labelMatch = labelMatch || (!card.labelIds || card.labelIds.length === 0)
+      }
+
+      const specificLabelIds = filters.labelIds.filter(id => id !== 'no-label')
+      if (specificLabelIds.length > 0) {
+        labelMatch = labelMatch || specificLabelIds.some(labelId => card.labelIds?.includes(labelId))
+      }
+
+      isMatch = isMatch && labelMatch
+    }
+
     return isMatch
   })
 }

@@ -7,18 +7,41 @@ import FormGroup from '@mui/material/FormGroup'
 import Popover from '@mui/material/Popover'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentActiveBoard, selectFilters, updateFilters } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { filterCards } from '~/utils/filterCards'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import LabelBadge from '~/components/Modal/ActiveCard/Labels/LabelBadge'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import Collapse from '@mui/material/Collapse'
+
+const LabelItem = ({ label, isChecked, onToggle }) => (
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={isChecked}
+        onChange={() => onToggle(label.id)}
+        size="small"
+      />
+    }
+    label={
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+        <LabelBadge label={label} fullWidth height="32px" />
+      </Box>
+    }
+    sx={{ width: '100%', mr: 0, '& .MuiFormControlLabel-label': { width: '100%' } }}
+  />
+)
 
 function FilterPanel({ anchorEl, isOpen, onClose }) {
   const dispatch = useDispatch()
   const filters = useSelector(selectFilters)
   const board = useSelector(selectCurrentActiveBoard)
   const currentUser = useSelector(selectCurrentUser)
+  const [isLabelsExpanded, setIsLabelsExpanded] = useState(false)
 
   const handleKeywordChange = (e) => {
     dispatch(updateFilters({ ...filters, keyword: e.target.value }))
@@ -45,8 +68,15 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
     dispatch(updateFilters({ ...filters, dueDateFilters: newDueDateFilters }))
   }
 
+  const handleLabelChange = (labelId) => {
+    const newLabelIds = filters.labelIds.includes(labelId)
+      ? filters.labelIds.filter(id => id !== labelId)
+      : [...filters.labelIds, labelId]
+    dispatch(updateFilters({ ...filters, labelIds: newLabelIds }))
+  }
+
   const clearFilters = () => {
-    dispatch(updateFilters({ keyword: '', memberIds: [], status: [], dueDateFilters: [] }))
+    dispatch(updateFilters({ keyword: '', memberIds: [], status: [], dueDateFilters: [], labelIds: [] }))
   }
 
   // Calculate matching cards count
@@ -138,6 +168,57 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
               }
               label={<Typography variant="body2">Không được đánh dấu là đã hoàn thành</Typography>}
             />
+          </FormGroup>
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>Nhãn</Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filters.labelIds.includes('no-label')}
+                  onChange={() => handleLabelChange('no-label')}
+                  size="small"
+                />
+              }
+              label={<Typography variant="body2">Không có nhãn</Typography>}
+            />
+            {board?.labels?.slice(0, 3).map(label => (
+              <LabelItem
+                key={label.id}
+                label={label}
+                isChecked={filters.labelIds.includes(label.id)}
+                onToggle={handleLabelChange}
+              />
+            ))}
+            
+            {board?.labels?.length > 3 && (
+              <>
+                <Button
+                  size="small"
+                  startIcon={isLabelsExpanded ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+                  onClick={() => setIsLabelsExpanded(!isLabelsExpanded)}
+                  sx={{ justifyContent: 'flex-start', pl: 1, color: 'text.secondary', textTransform: 'none' }}
+                >
+                  {isLabelsExpanded ? 'Ẩn bớt nhãn' : 'Xem thêm nhãn'}
+                </Button>
+                <Collapse in={isLabelsExpanded}>
+                  <Box sx={{ mt: 1 }}>
+                    {board?.labels?.slice(3).map(label => (
+                      <LabelItem
+                        key={label.id}
+                        label={label}
+                        isChecked={filters.labelIds.includes(label.id)}
+                        onToggle={handleLabelChange}
+                      />
+                    ))}
+                  </Box>
+                </Collapse>
+              </>
+            )}
           </FormGroup>
         </Box>
 

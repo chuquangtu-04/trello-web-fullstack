@@ -8,7 +8,7 @@ import { LABEL_COLORS } from '~/utils/constants'
  * @param {boolean} compact – chỉ hiện màu, ẩn tên (có tooltip)
  * @param {boolean} animate – có animation khi mount
  */
-function LabelBadge({ label, compact = false, animate = false }) {
+function LabelBadge({ label, compact = false, animate = false, fullWidth = false, height = '20px' }) {
   if (!label) return null
 
   // Tìm giá trị màu hex (color có thể là id như 'green' hoặc hex '#22c55e')
@@ -20,12 +20,13 @@ function LabelBadge({ label, compact = false, animate = false }) {
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        height: '20px',
+        height: height,
+        width: fullWidth ? '100%' : 'auto',
         borderRadius: compact ? '4px' : '3px',
         bgcolor: bgColor,
         px: compact ? '8px' : '6px',
         minWidth: compact ? '36px' : 'auto',
-        maxWidth: compact ? '36px' : '120px',
+        maxWidth: fullWidth ? '100%' : (compact ? '36px' : '120px'),
         cursor: 'default',
         transition: 'all 0.2s ease',
         overflow: 'hidden',
@@ -43,7 +44,7 @@ function LabelBadge({ label, compact = false, animate = false }) {
         <Box
           component="span"
           sx={{
-            fontSize: '11px',
+            fontSize: height !== '20px' ? '13px' : '11px',
             fontWeight: 700,
             color: '#fff',
             textShadow: '0 1px 1px rgba(0,0,0,0.3)',
