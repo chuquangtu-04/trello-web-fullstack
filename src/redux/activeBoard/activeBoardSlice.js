@@ -155,6 +155,18 @@ export const activeBoardSlice = createSlice({
 
       targetColumn.cards.splice(position, 0, movedCard)
       targetColumn.cardOrderIds.splice(position, 0, cardId)
+    },
+    addCardToBoard: (state, action) => {
+      const { card, position } = action.payload
+      const column = state.currentActiveBoard.columns.find(c => c._id === card.columnId)
+      if (column) {
+        // Xóa placeholder nếu có
+        column.cards = column.cards.filter(c => !c.FE_placeholderCard)
+        column.cardOrderIds = column.cardOrderIds.filter(id => !id.includes('placeholder'))
+
+        column.cards.splice(position, 0, card)
+        column.cardOrderIds.splice(position, 0, card._id)
+      }
     }
   },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
@@ -196,7 +208,8 @@ export const {
   updateLabelInBoard, 
   removeLabelFromBoard, 
   removeCardFromBoard,
-  moveCardInBoard
+  moveCardInBoard,
+  addCardToBoard
 } = activeBoardSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng

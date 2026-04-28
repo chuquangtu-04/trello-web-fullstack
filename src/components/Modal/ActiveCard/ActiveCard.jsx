@@ -44,12 +44,13 @@ import DatePickerPopover from './Dates/DatePickerPopover'
 import DateBadge from './Dates/DateBadge'
 import { useConfirm } from 'material-ui-confirm'
 import MoveCardModal from './MoveCardModal'
+import CopyCardModal from './CopyCardModal'
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
 import { useState } from 'react'
-import { archiveCardAPI, moveCardAPI } from '~/apis'
-import { removeCardFromBoard, moveCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { archiveCardAPI, moveCardAPI, copyCardAPI } from '~/apis'
+import { removeCardFromBoard, moveCardInBoard, addCardToBoard } from '~/redux/activeBoard/activeBoardSlice'
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -92,6 +93,10 @@ function ActiveCard() {
   // State cho MoveCardModal
   const [moveAnchorEl, setMoveAnchorEl] = useState(null)
   const isMoveModalOpen = Boolean(moveAnchorEl)
+
+  // State cho CopyCardModal
+  const [copyAnchorEl, setCopyAnchorEl] = useState(null)
+  const isCopyModalOpen = Boolean(copyAnchorEl)
 
   const handleCloseModal = () => {
     dispatch(clearAndHideCurrentActiveCard())
@@ -342,6 +347,19 @@ function ActiveCard() {
     }
   }
 
+  const handleOpenCopyModal = (e) => setCopyAnchorEl(e.currentTarget)
+  const handleCloseCopyModal = () => setCopyAnchorEl(null)
+
+  const onCopyCard = async (copyData) => {
+    try {
+      const newCard = await copyCardAPI(activeCard._id, copyData)
+      dispatch(addCardToBoard({ card: newCard, position: copyData.position }))
+      toast.success('Đã sao chép thẻ thành công')
+    } catch (err) {
+      // Lỗi được xử lý bởi interceptor
+    }
+  }
+
   return (
     <Modal
       disableScrollLock
@@ -539,7 +557,7 @@ function ActiveCard() {
             <Typography sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}>Actions</Typography>
             <Stack direction="column" spacing={1}>
               <SidebarItem onClick={handleOpenMoveModal}><ArrowForwardOutlinedIcon fontSize="small" />Move</SidebarItem>
-              <SidebarItem><ContentCopyOutlinedIcon fontSize="small" />Copy</SidebarItem>
+              <SidebarItem onClick={handleOpenCopyModal}><ContentCopyOutlinedIcon fontSize="small" />Copy</SidebarItem>
               {/* <SidebarItem><AutoAwesomeOutlinedIcon fontSize="small" />Make Template</SidebarItem> */}
               <SidebarItem onClick={handleArchiveCard}><ArchiveOutlinedIcon fontSize="small" />Delete Card</SidebarItem>
               <SidebarItem><ShareOutlinedIcon fontSize="small" />Share</SidebarItem>
@@ -551,6 +569,14 @@ function ActiveCard() {
               anchorEl={moveAnchorEl}
               card={activeCard}
               onMove={onMoveCard}
+            />
+
+            <CopyCardModal
+              isOpen={isCopyModalOpen}
+              onClose={handleCloseCopyModal}
+              anchorEl={copyAnchorEl}
+              card={activeCard}
+              onCopy={onCopyCard}
             />
           </Grid>
         </Grid>

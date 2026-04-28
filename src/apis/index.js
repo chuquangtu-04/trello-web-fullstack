@@ -174,3 +174,8 @@ export const moveCardAPI = async (cardId, data) => {
   return response.data
 }
 
+export const copyCardAPI = async (cardId, data) => {
+  const response = await post(`cards/${cardId}/copy`, data)
+  return response.data
+}
+
