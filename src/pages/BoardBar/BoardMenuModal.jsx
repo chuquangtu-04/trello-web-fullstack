@@ -9,8 +9,9 @@ import ArchiveIcon from '@mui/icons-material/Archive'
 import SettingsIcon from '@mui/icons-material/Settings'
 import HistoryIcon from '@mui/icons-material/History'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
 
-function BoardMenuModal({ isOpen, onClose, onOpenArchived, anchorEl }) {
+function BoardMenuModal({ isOpen, onClose, onOpenArchived, onOpenChangeBackground, anchorEl }) {
   return (
     <Popover
       open={isOpen}
@@ -77,6 +78,24 @@ function BoardMenuModal({ isOpen, onClose, onOpenArchived, anchorEl }) {
           disabled
         >
           Hoạt động (Sắp có)
+        </Button>
+
+        <Divider sx={{ my: 1 }} />
+
+        <Button
+          fullWidth
+          startIcon={<AutoFixHighOutlinedIcon />}
+          endIcon={<ChevronRightIcon sx={{ ml: 'auto' }} />}
+          onClick={onOpenChangeBackground}
+          sx={{ 
+            justifyContent: 'flex-start', 
+            py: 1.2, 
+            color: 'text.primary', 
+            textTransform: 'none',
+            '&:hover': { bgcolor: 'action.hover' } 
+          }}
+        >
+          Thay đổi hình nền
         </Button>
       </Box>
     </Popover>

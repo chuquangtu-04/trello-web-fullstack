@@ -12,6 +12,7 @@ import InviteBoardUser from './InviteBoardUser'
 import FilterPanel from './FilterPanel'
 import BoardMenuModal from './BoardMenuModal'
 import ArchivedItemsModal from './ArchivedItemsModal'
+import ChangeBackgroundModal from './ChangeBackgroundModal'
 import { useState, useEffect } from 'react'
 import Badge from '@mui/material/Badge'
 import TextField from '@mui/material/TextField'
@@ -46,6 +47,7 @@ function BoardBar({ board }) {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null)
   const [showBoardMenu, setShowBoardMenu] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+  const [showChangeBackground, setShowChangeBackground] = useState(false)
 
   // State phục vụ cho việc đổi tên board
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -81,7 +83,18 @@ function BoardBar({ board }) {
 
   const handleBackToMenu = () => {
     setShowArchived(false)
+    setShowChangeBackground(false)
     setShowBoardMenu(true)
+  }
+
+  const handleOpenChangeBackground = () => {
+    setShowBoardMenu(false)
+    setShowChangeBackground(true)
+  }
+
+  const handleCloseChangeBackground = () => {
+    setMenuAnchorEl(null)
+    setShowChangeBackground(false)
   }
 
   const handleUpdateBoardTitle = () => {
@@ -172,12 +185,20 @@ function BoardBar({ board }) {
           anchorEl={menuAnchorEl}
           onClose={handleCloseBoardMenu} 
           onOpenArchived={handleOpenArchived}
+          onOpenChangeBackground={handleOpenChangeBackground}
         />
         <ArchivedItemsModal 
           isOpen={showArchived} 
           anchorEl={menuAnchorEl}
           onClose={handleCloseArchived} 
           onBack={handleBackToMenu}
+        />
+        <ChangeBackgroundModal
+          isOpen={showChangeBackground}
+          anchorEl={menuAnchorEl}
+          onClose={handleCloseChangeBackground}
+          onBack={handleBackToMenu}
+          board={board}
         />
       </Box>
 
