@@ -43,12 +43,13 @@ import LabelPicker from './Labels/LabelPicker'
 import DatePickerPopover from './Dates/DatePickerPopover'
 import DateBadge from './Dates/DateBadge'
 import { useConfirm } from 'material-ui-confirm'
+import MoveCardModal from './MoveCardModal'
 
 import { styled } from '@mui/material/styles'
 import { CARD_MEMBERS_ACTIONS } from '~/utils/constants'
 import { useState } from 'react'
-import { archiveCardAPI } from '~/apis'
-import { removeCardFromBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { archiveCardAPI, moveCardAPI } from '~/apis'
+import { removeCardFromBoard, moveCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -87,6 +88,10 @@ function ActiveCard() {
   // State cho DatePicker
   const [dateAnchorEl, setDateAnchorEl] = useState(null)
   const isDatePickerOpen = Boolean(dateAnchorEl)
+
+  // State cho MoveCardModal
+  const [moveAnchorEl, setMoveAnchorEl] = useState(null)
+  const isMoveModalOpen = Boolean(moveAnchorEl)
 
   const handleCloseModal = () => {
     dispatch(clearAndHideCurrentActiveCard())
@@ -309,6 +314,34 @@ function ActiveCard() {
     }).catch(() => {})
   }
 
+  const handleOpenMoveModal = (e) => setMoveAnchorEl(e.currentTarget)
+  const handleCloseMoveModal = () => setMoveAnchorEl(null)
+
+  const onMoveCard = async (moveData) => {
+    const isDifferentBoard = moveData.targetBoardId !== moveData.boardId
+
+    if (isDifferentBoard) {
+      // Nếu khác board: Xóa card khỏi board hiện tại và đóng modal ngay lập tức
+      dispatch(removeCardFromBoard({ cardId: activeCard._id, columnId: activeCard.columnId }))
+      handleCloseModal()
+      toast.success('Đã chuyển thẻ sang bảng mới thành công!')
+    } else {
+      // Nếu cùng board: Optimistic update
+      dispatch(moveCardInBoard(moveData))
+      // Nếu chuyển sang column khác, cập nhật lại columnId cho activeCard trong modal
+      if (moveData.columnId !== moveData.targetColumnId) {
+        dispatch(updateCurrentActiveCard({ ...activeCard, columnId: moveData.targetColumnId }))
+      }
+      toast.success('Đã di chuyển thẻ thành công')
+    }
+
+    try {
+      await moveCardAPI(activeCard._id, moveData)
+    } catch (err) {
+      // Nếu lỗi, có thể cần fetch lại board để đồng bộ
+    }
+  }
+
   return (
     <Modal
       disableScrollLock
@@ -505,12 +538,20 @@ function ActiveCard() {
 
             <Typography sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}>Actions</Typography>
             <Stack direction="column" spacing={1}>
-              <SidebarItem><ArrowForwardOutlinedIcon fontSize="small" />Move</SidebarItem>
+              <SidebarItem onClick={handleOpenMoveModal}><ArrowForwardOutlinedIcon fontSize="small" />Move</SidebarItem>
               <SidebarItem><ContentCopyOutlinedIcon fontSize="small" />Copy</SidebarItem>
               {/* <SidebarItem><AutoAwesomeOutlinedIcon fontSize="small" />Make Template</SidebarItem> */}
               <SidebarItem onClick={handleArchiveCard}><ArchiveOutlinedIcon fontSize="small" />Delete Card</SidebarItem>
               <SidebarItem><ShareOutlinedIcon fontSize="small" />Share</SidebarItem>
             </Stack>
+
+            <MoveCardModal
+              isOpen={isMoveModalOpen}
+              onClose={handleCloseMoveModal}
+              anchorEl={moveAnchorEl}
+              card={activeCard}
+              onMove={onMoveCard}
+            />
           </Grid>
         </Grid>
       </Box>

@@ -169,3 +169,8 @@ export const deleteCardAPI = async (cardId) => {
   return response.data
 }
 
+export const moveCardAPI = async (cardId, data) => {
+  const response = await patch(`cards/${cardId}/move`, data)
+  return response.data
+}
+
