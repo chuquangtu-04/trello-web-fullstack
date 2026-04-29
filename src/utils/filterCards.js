@@ -1,9 +1,10 @@
 import moment from 'moment'
 
 export const filterCards = (cards, filters, currentUser) => {
+  if (!cards) return []
   if (!filters) return cards
 
-  return cards.filter(card => {
+  return (cards || []).filter(card => {
     // Nếu card là placeholder thì mặc định không bị filter để giữ cấu trúc UI kéo thả
     if (card.FE_placeholderCard) return true
 

@@ -42,7 +42,7 @@ function Column({ column }) {
   const newCardTitle = useState('')
   const [newCardTitleValue, setNewCardTitleValue] = useState('')
   const [anchorEl, setAnchorEl] = useState(null)
-  const orderedCard = column.cards
+  const orderedCard = column.cards || []
   const filters = useSelector(selectFilters)
   const currentUser = useSelector(selectCurrentUser)
   const filteredCards = filterCards(orderedCard, filters, currentUser)

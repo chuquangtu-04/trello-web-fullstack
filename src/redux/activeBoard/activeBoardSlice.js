@@ -37,15 +37,10 @@ export const activeBoardSlice = createSlice({
     // Lưu ý: ở đây luôn luôn cần cặp ngoặc nhọn cho function trong reducer cho dù code bên trong chỉ có 1      dòng, đây là rule của Redux
     // https://redux-toolkit.js.org/usage/immer-reducers#mutating-and-returning-state
     updateCurrentActiveBoard: (state, action) => {
-      // action.payload là chuẩn đặt tên nhãn dữ liệu vào reducer,
-      // ở đây chúng ta gán nó ra một biến có nghĩa hơn
-      let board = action.payload
-
-      // Xử lý dữ liệu nếu cần thiết
-      // ...
-
-      // Update lại dữ liệu của currentActiveBoard
-      state.currentActiveBoard = board
+      const payload = action.payload
+      // Nếu payload có .value (trường hợp driver mongodb trả về command result) thì lấy .value, không thì lấy chính nó
+      const updatedData = payload?.value ? payload.value : payload
+      state.currentActiveBoard = { ...state.currentActiveBoard, ...updatedData }
     },
     updateCardInBoard: (state, action) => {
       // Update nested data

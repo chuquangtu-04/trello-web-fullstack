@@ -82,7 +82,7 @@ function FilterPanel({ anchorEl, isOpen, onClose }) {
   // Calculate matching cards count
   const matchCount = useMemo(() => {
     if (!board) return 0
-    const allCards = board.columns.flatMap(c => c.cards).filter(c => !c.FE_placeholderCard)
+    const allCards = board.columns?.flatMap(c => c.cards || []).filter(c => !c.FE_placeholderCard) || []
     const filtered = filterCards(allCards, filters, currentUser)
     return filtered.length
   }, [board, filters, currentUser])

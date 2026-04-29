@@ -64,14 +64,14 @@ function BoardContent({
 
   useEffect(() => {
     // Column đã được sắp xếp ở component cha cao nhất
-    setOrderedColumnState(board.columns)
+    setOrderedColumnState(board?.columns || [])
   }, [board])
 
   // Tìm một cái Column theo cardId
   const findColumnByCardId = (cardId) => {
     // Đoạn này cần lưu ý, nên dùng c.cards thay vì c.cardOrderIds bởi vì bước handleDragOver chúng ta sẽ
     // làm dữ liệu cho cards hoàn chỉnh trước rồi mới tạo ra cardOrderIds mới
-    return orderedColumnState.find(column => column.cards.map(card => card._id)?.includes(cardId))
+    return (orderedColumnState || []).find(column => column.cards?.map(card => card._id)?.includes(cardId))
   }
 
 

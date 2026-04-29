@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { generatePlaceholderCard } from '~/utils/formatters'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 
-function ListColumns({ columns }) {
+function ListColumns({ columns = [] }) {
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
   const [openNewColumnFrom, setOpenNewColumnFrom] = useState(false)
@@ -32,36 +32,23 @@ function ListColumns({ columns }) {
     // Gọi Api tạo mới column và làm lại dữ liệu State Board
     const createNewColumn = await createNewColumnAPI({
       ...newColumnData,
-      boardId: board._id
+      boardId: board?._id
     })
     createNewColumn.cards = [generatePlaceholderCard(createNewColumn)],
     createNewColumn.cardOrderIds = [generatePlaceholderCard(createNewColumn)._id]
 
-    //  * Đoạn này sẽ dính lỗi object is not extensible bởi dù đã copy/clone ra giá trị newBoard nhưng bản chất
-    //  * của spread operator là Shallow Copy/Clone, nên dính phải rules Immutability trong Redux Toolkit không
-    //  * dùng được hàm PUSH (sửa giá trị mảng trực tiếp), cách đơn giản nhanh gọn nhất ở trường hợp này của chúng
-    //  * ta là dùng tới Deep Copy/Clone toàn bộ cái Board cho dễ hiểu và code ngắn gọn.
-    //  * https://redux-toolkit.js.org/usage/immer-reducers
-    //  * Tài liệu thêm về Shallow và Deep Copy Object trong JS:
-    //  * https://www.javascripttutorial.net/object/3-ways-to-copy-objects-in-javascript/
-
     // Cập nhật lại board
-    const newBoard = cloneDeep(board)
+    const newBoard = cloneDeep(board || {})
+    if (!newBoard.columns) newBoard.columns = []
+    if (!newBoard.columnOrderIds) newBoard.columnOrderIds = []
     newBoard.columns.push(createNewColumn)
     newBoard.columnOrderIds.push(createNewColumn._id)
-    //  * Ngoài ra cách nữa là vẫn có thể dùng array.concat thay cho push như docs của Redux Toolkit ở trên vì
-    //  * push như đã nói nó sẽ thay đổi giá trị mảng trực tiếp, còn concat thì nó merge – ghép mảng lại và
-    //  * tạo ra một mảng mới để chúng ta gán lại giá trị nên không vấn đề gì.
-    // const newBoard = { ...board }
-    // newBoard.columns = newBoard.columns.concat([createNewColumn])
-    // newBoard.columnOrderIds = newBoard.columnOrderIds.concat([createNewColumn._id])
-    // setBoard(newBoard)
     dispatch(updateCurrentActiveBoard(newBoard))
     setNewColumnTitle('')
     toggleOpenNewColumnFrom()
   }
   return (
-    <SortableContext items={columns?.map(column => column._id)} strategy={horizontalListSortingStrategy}>
+    <SortableContext items={(columns || []).map(column => column._id)} strategy={horizontalListSortingStrategy}>
       <Box sx={{
         bgcolor: 'inherit',
         width: '100%',
@@ -72,7 +59,7 @@ function ListColumns({ columns }) {
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
         {
-          columns.map(column => (<Column key={column._id} column={column}/>))
+          columns?.map(column => (<Column key={column._id} column={column}/>))
         }
 
         {
