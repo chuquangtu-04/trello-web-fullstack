@@ -20,7 +20,9 @@ import { Link, useLocation } from 'react-router-dom'
 import SidebarCreateBoardModal from './create'
 import { TemplatesView } from './templates'
 import { HomeView } from './home'
+import { StarredView } from './starred'
 import { fetchBoardsAPI } from '~/apis'
+import StarIcon from '@mui/icons-material/Star'
 
 import { styled } from '@mui/material/styles'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
@@ -116,6 +118,13 @@ function Boards() {
                 Boards
               </SidebarItem>
               <SidebarItem
+                className={activeSidebar === 'starred' ? 'active' : ''}
+                onClick={() => setActiveSidebar('starred')}
+              >
+                <StarIcon fontSize="small" />
+                Starred
+              </SidebarItem>
+              <SidebarItem
                 className={activeSidebar === 'templates' ? 'active' : ''}
                 onClick={() => setActiveSidebar('templates')}
               >
@@ -139,6 +148,8 @@ function Boards() {
           <Grid xs={12} sm={9}>
             {activeSidebar === 'home' ? (
               <HomeView setActiveSidebar={setActiveSidebar} />
+            ) : activeSidebar === 'starred' ? (
+              <StarredView />
             ) : activeSidebar === 'templates' ? (
               <TemplatesView afterCreateNewBoard={() => {
                 setActiveSidebar('boards')
@@ -200,20 +211,23 @@ function Boards() {
                               flex: 1
                             }}
                           >
-                            <Typography
-                              gutterBottom
-                              variant="h6"
-                              component="div"
-                              sx={{
-                                overflow: 'hidden',
-                                whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis',
-                                minHeight: 32,
-                                maxWidth: '100%'
-                              }}
-                            >
-                              {b?.title}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <Typography
+                                gutterBottom
+                                variant="h6"
+                                component="div"
+                                sx={{
+                                  overflow: 'hidden',
+                                  whiteSpace: 'nowrap',
+                                  textOverflow: 'ellipsis',
+                                  minHeight: 32,
+                                  maxWidth: b?.isStarred ? 'calc(100% - 24px)' : '100%'
+                                }}
+                              >
+                                {b?.title}
+                              </Typography>
+                              {b?.isStarred && <StarIcon sx={{ color: '#f1c40f', fontSize: 'small' }} />}
+                            </Box>
                             <Typography
                               variant="body2"
                               color="text.secondary"

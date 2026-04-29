@@ -42,7 +42,17 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   // Reducers: Nơi xử lý dữ liệu đồng bộ
-  reducers: {},
+  reducers: {
+    updateUserStarredBoards: (state, action) => {
+      const { boardId, isStarred } = action.payload
+      if (!state.currentUser.starredBoardIds) state.currentUser.starredBoardIds = []
+      if (isStarred) {
+        state.currentUser.starredBoardIds.push(boardId)
+      } else {
+        state.currentUser.starredBoardIds = state.currentUser.starredBoardIds.filter(id => id !== boardId)
+      }
+    }
+  },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
   extraReducers: (builder) => {
     builder.addCase(loginUserAPI.fulfilled, (state, action) => {
@@ -71,7 +81,7 @@ export const userSlice = createSlice({
 
 // Actions: Là nơi dành cho các components bên dưới gọi bằng dispatch() tới nó để cập nhật lại dữ liệu thông qua reducer (chạy đồng bộ)
 // Để ý ở trên thì không thấy properties actions đâu cả, bởi vì những cái actions này đơn giản là được thằng redux tạo tự động theo tên của reducer nhé.
-// export const {} = userSlice.actions
+export const { updateUserStarredBoards } = userSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentUser = (state) => {

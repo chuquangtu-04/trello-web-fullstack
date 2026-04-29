@@ -57,7 +57,8 @@ function Board() {
       const currentBoardInfo = {
         _id: board._id,
         title: board.title,
-        background: board.background
+        background: board.background,
+        isStarred: board.isStarred
       }
       
       // Đưa board đang xem lên đầu, xóa bản ghi cũ nếu đã có

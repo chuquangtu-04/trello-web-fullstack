@@ -9,6 +9,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import AddIcon from '@mui/icons-material/Add'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import StarIcon from '@mui/icons-material/Star'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
@@ -131,20 +132,23 @@ export function HomeView({ setActiveSidebar }) {
                     flex: 1
                   }}
                 >
-                  <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap',
-                      textOverflow: 'ellipsis',
-                      minHeight: 32,
-                      maxWidth: '100%'
-                    }}
-                  >
-                    {b?.title}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography
+                      gutterBottom
+                      variant="h6"
+                      component="div"
+                      sx={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        minHeight: 32,
+                        maxWidth: b?.isStarred ? 'calc(100% - 24px)' : '100%'
+                      }}
+                    >
+                      {b?.title}
+                    </Typography>
+                    {b?.isStarred && <StarIcon sx={{ color: '#f1c40f', fontSize: 'small' }} />}
+                  </Box>
                   <Box
                     component={Link}
                     to={`/boards/${b._id}`}

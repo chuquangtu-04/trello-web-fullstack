@@ -167,6 +167,11 @@ export const activeBoardSlice = createSlice({
         column.cards.splice(position, 0, card)
         column.cardOrderIds.splice(position, 0, card._id)
       }
+    },
+    toggleBoardStar: (state, action) => {
+      if (state.currentActiveBoard) {
+        state.currentActiveBoard.isStarred = action.payload
+      }
     }
   },
   // ExtraReducer: Nơi xử lý dữ liệu bất đồng bộ
@@ -209,7 +214,8 @@ export const {
   removeLabelFromBoard, 
   removeCardFromBoard,
   moveCardInBoard,
-  addCardToBoard
+  addCardToBoard,
+  toggleBoardStar
 } = activeBoardSlice.actions
 
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng

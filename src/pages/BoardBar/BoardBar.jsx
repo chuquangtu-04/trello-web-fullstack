@@ -1,9 +1,11 @@
+import StarIcon from '@mui/icons-material/Star'
+import StarBorderIcon from '@mui/icons-material/StarBorder'
 import BoltIcon from '@mui/icons-material/Bolt'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import VpnLockIcon from '@mui/icons-material/VpnLock'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { Tooltip } from '@mui/material'
+import { Tooltip, IconButton } from '@mui/material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import { capitalizeFirstLetter } from '~/utils/formatters'
@@ -17,8 +19,9 @@ import { useState, useEffect } from 'react'
 import Badge from '@mui/material/Badge'
 import TextField from '@mui/material/TextField'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectFilters, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-import { updateBoardDetailsAPI } from '~/apis'
+import { selectFilters, updateCurrentActiveBoard, toggleBoardStar } from '~/redux/activeBoard/activeBoardSlice'
+import { updateUserStarredBoards } from '~/redux/user/userSlice'
+import { updateBoardDetailsAPI, toggleBoardStarAPI } from '~/apis'
 import { toast } from 'react-toastify'
 
 const MENU_STYLE = {
@@ -113,6 +116,19 @@ function BoardBar({ board }) {
       .finally(() => setIsEditingTitle(false))
   }
 
+  const handleToggleStar = () => {
+    const newStarState = !board?.isStarred
+    // Optimistic update
+    dispatch(toggleBoardStar(newStarState))
+    dispatch(updateUserStarredBoards({ boardId: board._id, isStarred: newStarState }))
+    
+    toggleBoardStarAPI(board._id).catch(() => {
+      // Rollback
+      dispatch(toggleBoardStar(!newStarState))
+      dispatch(updateUserStarredBoards({ boardId: board._id, isStarred: !newStarState }))
+    })
+  }
+
   const activeFilterCount = (filters.keyword ? 1 : 0) + filters.memberIds.length + filters.status.length
 
   return (
@@ -160,6 +176,23 @@ function BoardBar({ board }) {
               onClick={() => setIsEditingTitle(true)}
             />
           )}
+        </Tooltip>
+
+        <Tooltip title={board?.isStarred ? 'Xóa khỏi danh sách yêu thích' : 'Thêm vào danh sách yêu thích'}>
+          <IconButton
+            onClick={handleToggleStar}
+            sx={{
+              padding: '6px',
+              color: board?.isStarred ? '#f1c40f' : 'white',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'scale(1.2)',
+                color: board?.isStarred ? '#f1c40f' : '#f1c40f'
+              }
+            }}
+          >
+            {board?.isStarred ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+          </IconButton>
         </Tooltip>
         
         <Tooltip title={board?.type}>

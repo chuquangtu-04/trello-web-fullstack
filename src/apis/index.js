@@ -41,6 +41,11 @@ export const fetchBoardsAPI = async (searchPath) => {
   return res.data
 }
 
+export const toggleBoardStarAPI = async (boardId) => {
+  const res = await patch(`boards/${boardId}/star`)
+  return res.data
+}
+
 export const inviteUserToBoardAPI = async (data) => {
   const res = await post('invitations/board', data)
   toast.success(
