@@ -46,6 +46,11 @@ export const toggleBoardStarAPI = async (boardId) => {
   return res.data
 }
 
+export const updateBoardVisibilityAPI = async (boardId, visibility) => {
+  const res = await patch(`boards/${boardId}/visibility`, { visibility })
+  return res.data
+}
+
 export const inviteUserToBoardAPI = async (data) => {
   const res = await post('invitations/board', data)
   toast.success(

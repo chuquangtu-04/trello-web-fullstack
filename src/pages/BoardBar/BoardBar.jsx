@@ -3,7 +3,6 @@ import StarBorderIcon from '@mui/icons-material/StarBorder'
 import BoltIcon from '@mui/icons-material/Bolt'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import VpnLockIcon from '@mui/icons-material/VpnLock'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { Tooltip, IconButton } from '@mui/material'
 import Box from '@mui/material/Box'
@@ -23,6 +22,7 @@ import { selectFilters, updateCurrentActiveBoard, toggleBoardStar } from '~/redu
 import { updateUserStarredBoards } from '~/redux/user/userSlice'
 import { updateBoardDetailsAPI, toggleBoardStarAPI } from '~/apis'
 import { toast } from 'react-toastify'
+import VisibilitySelector from './VisibilitySelector'
 
 const MENU_STYLE = {
   color: 'primary.main',
@@ -195,9 +195,7 @@ function BoardBar({ board }) {
           </IconButton>
         </Tooltip>
         
-        <Tooltip title={board?.type}>
-          <Chip sx={MENU_STYLE} icon={<VpnLockIcon />} label={capitalizeFirstLetter(board?.type)} onClick={() => { }} />
-        </Tooltip>
+        <VisibilitySelector board={board} />
 
         <Chip sx={MENU_STYLE} icon={<BoltIcon />} label="Automatic" onClick={() => { }} />
 
