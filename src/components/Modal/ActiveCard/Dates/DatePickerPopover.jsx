@@ -15,11 +15,13 @@ import moment from 'moment'
 
 // Constants
 const REMINDERS = [
-  { value: 'none', label: 'Không' },
-  { value: '5m', label: '5 phút trước' },
-  { value: '10m', label: '10 phút trước' },
-  { value: '1h', label: '1 giờ trước' },
-  { value: '1d', label: '1 ngày trước' }
+  { id: 'none', label: 'Không' },
+  { id: '5m', label: '5 phút trước', value: 5, unit: 'minutes' },
+  { id: '10m', label: '10 phút trước', value: 10, unit: 'minutes' },
+  { id: '30m', label: '30 phút trước', value: 30, unit: 'minutes' },
+  { id: '1h', label: '1 giờ trước', value: 1, unit: 'hours' },
+  { id: '1d', label: '1 ngày trước', value: 1, unit: 'days' },
+  { id: 'custom', label: 'Tùy chỉnh...' }
 ]
 
 const REPEATS = [
@@ -40,7 +42,9 @@ function DatePickerPopover({ anchorEl, isOpen, onClose, card, onSave, onRemove }
   const [dueTimeStr, setDueTimeStr] = useState('') // HH:mm
   const [dueDateStr, setDueDateStr] = useState('') // YYYY-MM-DD
   
-  const [reminder, setReminder] = useState(card?.reminder || 'none')
+  const [reminderId, setReminderId] = useState('none')
+  const [customReminderValue, setCustomReminderValue] = useState(1)
+  const [customReminderUnit, setCustomReminderUnit] = useState('minutes')
   const [repeat, setRepeat] = useState(card?.repeat || 'none')
 
   // Focus state for calendar picking
@@ -53,7 +57,21 @@ function DatePickerPopover({ anchorEl, isOpen, onClose, card, onSave, onRemove }
       setStartDateStr(card?.startDate ? moment(card.startDate).format('YYYY-MM-DD') : '')
       setDueDateStr(card?.dueDate ? moment(card.dueDate).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'))
       setDueTimeStr(card?.dueTime || moment().format('HH:mm'))
-      setReminder(card?.reminder || 'none')
+      
+      // Khởi tạo reminder
+      if (!card?.reminder) {
+        setReminderId('none')
+      } else {
+        const found = REMINDERS.find(r => r.value === card.reminder.value && r.unit === card.reminder.unit)
+        if (found) {
+          setReminderId(found.id)
+        } else {
+          setReminderId('custom')
+          setCustomReminderValue(card.reminder.value)
+          setCustomReminderUnit(card.reminder.unit)
+        }
+      }
+
       setRepeat(card?.repeat || 'none')
       setCurrentMonth(card?.dueDate ? moment(card.dueDate).startOf('month') : moment().startOf('month'))
     }
@@ -86,12 +104,44 @@ function DatePickerPopover({ anchorEl, isOpen, onClose, card, onSave, onRemove }
     }
   }
 
+  // Tính toán thời gian thông báo
+  const notificationTime = useMemo(() => {
+    if (!dueDateStr) return null
+    let val, unit
+    if (reminderId === 'none') return null
+    if (reminderId === 'custom') {
+      val = customReminderValue
+      unit = customReminderUnit
+    } else {
+      const found = REMINDERS.find(r => r.id === reminderId)
+      val = found.value
+      unit = found.unit
+    }
+
+    const due = moment(dueDateStr)
+    if (dueTimeStr) {
+      const [h, m] = dueTimeStr.split(':')
+      due.set({ hour: h, minute: m, second: 0 })
+    }
+    return due.subtract(val, unit)
+  }, [dueDateStr, dueTimeStr, reminderId, customReminderValue, customReminderUnit])
+
   const handleSave = () => {
+    let finalReminder = null
+    if (reminderId !== 'none') {
+      if (reminderId === 'custom') {
+        finalReminder = { value: parseInt(customReminderValue), unit: customReminderUnit }
+      } else {
+        const found = REMINDERS.find(r => r.id === reminderId)
+        finalReminder = { value: found.value, unit: found.unit }
+      }
+    }
+
     const data = {
       startDate: hasStartDate && startDateStr ? moment(startDateStr).toISOString() : null,
-      dueDate: dueDateStr ? moment(dueDateStr).toISOString() : null,
+      dueDate: dueDateStr ? moment(`${dueDateStr} ${dueTimeStr || '00:00'}`).toISOString() : null,
       dueTime: dueTimeStr || null,
-      reminder: reminder !== 'none' ? reminder : null,
+      reminder: finalReminder,
       repeat: repeat !== 'none' ? repeat : null
     }
     onSave(data)
@@ -219,9 +269,38 @@ function DatePickerPopover({ anchorEl, isOpen, onClose, card, onSave, onRemove }
 
       {/* Selects */}
       <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>Thiết lập nhắc nhở</Typography>
-      <Select size="small" fullWidth value={reminder} onChange={e => setReminder(e.target.value)} sx={{ mb: 1.5 }}>
-        {REMINDERS.map(r => <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>)}
+      <Select size="small" fullWidth value={reminderId} onChange={e => setReminderId(e.target.value)} sx={{ mb: 1.5 }}>
+        {REMINDERS.map(r => <MenuItem key={r.id} value={r.id}>{r.label}</MenuItem>)}
       </Select>
+
+      {/* Custom Reminder Box */}
+      {reminderId === 'custom' && (
+        <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
+          <TextField 
+            size="small" 
+            type="number"
+            value={customReminderValue}
+            onChange={e => setCustomReminderValue(e.target.value)}
+            sx={{ flex: 1 }}
+          />
+          <Select 
+            size="small" 
+            value={customReminderUnit} 
+            onChange={e => setCustomReminderUnit(e.target.value)}
+            sx={{ flex: 1.5 }}
+          >
+            <MenuItem value="minutes">Phút</MenuItem>
+            <MenuItem value="hours">Giờ</MenuItem>
+            <MenuItem value="days">Ngày</MenuItem>
+          </Select>
+        </Box>
+      )}
+
+      {notificationTime && (
+        <Typography variant="caption" color="primary" sx={{ display: 'block', mb: 1.5, fontStyle: 'italic', fontWeight: 500 }}>
+          Email sẽ được gửi lúc: {notificationTime.format('HH:mm DD/MM')}
+        </Typography>
+      )}
 
       <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>Định kỳ</Typography>
       <Select size="small" fullWidth value={repeat} onChange={e => setRepeat(e.target.value)} sx={{ mb: 2 }}>
