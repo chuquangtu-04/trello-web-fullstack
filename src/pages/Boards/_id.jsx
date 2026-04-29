@@ -22,6 +22,7 @@ import {
   updateCardInBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socketClient'
+import AIChat from '~/components/AIChat/AIChat'
 
 function Board() {
   // Không dùng State của component nữa mà chuyển qua dùng State của Redux
@@ -220,6 +221,7 @@ function Board() {
           moveCardInColumn={moveCardInColumn}
           moveCardOutColumn={moveCardOutColumn}
           board={board}/>
+        <AIChat/>
       </Box>
     </Container>
   )

@@ -189,3 +189,8 @@ export const copyCardAPI = async (cardId, data) => {
   return response.data
 }
 
+/** AI Chat */
+export const callAIChatAPI = async (boardId, message) => {
+  const res = await post('ai/chat', { boardId, message })
+  return res.data
+}
